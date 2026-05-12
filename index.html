@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>リスキリングのための持ち味発見</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Helvetica Neue',Arial,'Hiragino Kaku Gothic ProN','Hiragino Sans',Meiryo,sans-serif;background:#f8faf9;color:#1a1a1a;min-height:100vh}
+.container{max-width:720px;margin:0 auto;padding:2rem 1.5rem}
+.progress-wrap{margin-bottom:2rem}
+.progress-bar{display:flex;gap:5px;margin-bottom:8px}
+.progress-step{height:3px;flex:1;border-radius:2px;background:#e0e0e0;transition:background 0.4s}
+.progress-step.done{background:#1D9E75}.progress-step.current{background:#5DCAA5}
+.progress-labels{display:flex;gap:5px}
+.progress-label{flex:1;font-size:9px;color:#888;text-align:center;line-height:1.3}
+.progress-label.current{color:#0F6E56;font-weight:600}
+.step{display:none}.step.active{display:block}
+.tag{display:inline-block;font-size:10px;letter-spacing:0.08em;color:#888;text-transform:uppercase;margin-bottom:0.5rem}
+h1{font-size:26px;font-weight:600;color:#0F6E56;margin-bottom:0.5rem;line-height:1.4}
+h2{font-size:20px;font-weight:500;color:#1a1a1a;margin-bottom:0.5rem;line-height:1.4}
+.lead{font-size:14px;color:#555;line-height:1.8;margin-bottom:1.5rem}
+.note{font-size:12px;color:#999;line-height:1.6}
+.hero{border:1px solid #e0e0e0;border-radius:12px;padding:1.25rem 1.25rem 1.25rem 1.5rem;margin-bottom:1.5rem;background:#f5faf8;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:#1D9E75;border-radius:2px 0 0 2px}
+.hero-title{font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:5px}
+.hero-text{font-size:12px;color:#555;line-height:1.7}
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.5rem}
+.step-icon-card{border:1px solid #e0e0e0;border-radius:10px;padding:12px 8px;text-align:center;background:#fff}
+.step-icon-card i{font-size:20px;margin-bottom:5px;display:block}
+.step-icon-name{font-size:11px;font-weight:600;color:#1a1a1a;margin-bottom:2px}
+.step-icon-desc{font-size:10px;color:#888;line-height:1.3}
+.card{border:1px solid #e0e0e0;border-radius:12px;padding:1.25rem;margin-bottom:1rem;background:#fff}
+.card-title{font-size:12px;font-weight:600;color:#555;letter-spacing:0.04em;padding-bottom:8px;margin-bottom:12px;border-bottom:1px solid #f0f0f0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:12px;color:#555}
+.field input,.field select{border:1px solid #e0e0e0;border-radius:8px;padding:8px 10px;font-size:13px;color:#1a1a1a;background:#fafafa;outline:none;font-family:inherit;width:100%}
+.field input:focus,.field select:focus{border-color:#1D9E75;background:#fff}
+.field input::placeholder{color:#bbb}
+.opt{font-size:10px;color:#999;background:#f5f5f5;border:1px solid #e0e0e0;border-radius:4px;padding:1px 5px;margin-left:4px}
+.sns-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.sns-icon{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.sns-row input{flex:1;border:1px solid #e0e0e0;border-radius:8px;padding:7px 10px;font-size:12px;color:#1a1a1a;background:#fafafa;outline:none;font-family:inherit}
+.sns-row input:focus{border-color:#1D9E75;background:#fff}
+.sns-row input::placeholder{color:#bbb}
+.period-card{border:1px solid #e0e0e0;border-radius:12px;padding:1rem 1.25rem;margin-bottom:0.75rem;background:#fff}
+.period-header{display:flex;align-items:center;gap:10px;margin-bottom:0.75rem}
+.period-num{width:26px;height:26px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#0F6E56;flex-shrink:0}
+.period-title-input{flex:1;border:none;border-bottom:1px solid #e0e0e0;background:transparent;font-size:13px;font-weight:500;color:#1a1a1a;padding:2px 4px;outline:none;font-family:inherit}
+.period-title-input:focus{border-bottom-color:#1D9E75}
+.period-title-input::placeholder{color:#bbb;font-weight:400}
+.slider-row{display:flex;align-items:center;gap:10px;margin-bottom:0.75rem}
+.slider-label{font-size:11px;color:#555;width:52px}
+.slider-row input[type=range]{flex:1;accent-color:#1D9E75}
+.slider-val{font-size:12px;font-weight:600;min-width:40px;text-align:right;color:#1a1a1a}
+textarea{width:100%;border:1px solid #e0e0e0;border-radius:8px;padding:8px 10px;font-size:12px;color:#1a1a1a;background:#fafafa;resize:vertical;min-height:56px;outline:none;font-family:inherit;line-height:1.5}
+textarea:focus{border-color:#1D9E75;background:#fff}
+textarea::placeholder{color:#bbb}
+.skill-section{border:1px solid #e0e0e0;border-radius:12px;padding:0 1.25rem;margin-bottom:0.75rem;background:#fff}
+.skill-section-hd{font-size:11px;font-weight:600;color:#555;padding:10px 0 6px;border-bottom:1px solid #f0f0f0;letter-spacing:0.04em}
+.skill-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #f5f5f5}
+.skill-row:last-child{border-bottom:none}
+.skill-info{flex:1}
+.skill-name{font-size:13px;font-weight:500;color:#1a1a1a}
+.skill-desc{font-size:11px;color:#888;margin-top:2px}
+.stars{display:flex;gap:3px}
+.star{font-size:22px;cursor:pointer;color:#ddd;transition:color 0.1s,transform 0.1s;line-height:1;user-select:none}
+.star:hover{transform:scale(1.2)}
+.star.on{color:#EF9F27}
+.btn-primary{display:inline-flex;align-items:center;gap:6px;background:#1D9E75;color:white;border:none;border-radius:8px;padding:11px 22px;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s,transform 0.1s;font-family:inherit}
+.btn-primary:hover{background:#0F6E56}.btn-primary:active{transform:scale(0.98)}
+.btn-secondary{display:inline-flex;align-items:center;gap:6px;background:#fff;color:#555;border:1px solid #ddd;border-radius:8px;padding:11px 18px;font-size:14px;cursor:pointer;transition:background 0.2s;font-family:inherit}
+.btn-secondary:hover{background:#f5f5f5}
+.btn-amber{display:inline-flex;align-items:center;gap:6px;background:#BA7517;color:white;border:none;border-radius:8px;padding:11px 22px;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s;font-family:inherit}
+.btn-amber:hover{background:#854F0B}
+.btn-row{display:flex;gap:10px;margin-top:1.5rem;align-items:center;flex-wrap:wrap}
+.confirm-box{border:1px solid #5DCAA5;border-radius:12px;padding:1.25rem;background:#E1F5EE;margin-bottom:1.25rem}
+.confirm-box p{font-size:13px;color:#0F6E56;line-height:1.7}
+.loading-box{border:1px solid #e0e0e0;border-radius:12px;padding:2rem;text-align:center;background:#fafafa;margin-bottom:1rem}
+.loading-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#1D9E75;animation:pulse 1.2s ease-in-out infinite;margin:0 3px}
+.loading-dot:nth-child(2){animation-delay:0.2s}.loading-dot:nth-child(3){animation-delay:0.4s}
+@keyframes pulse{0%,80%,100%{opacity:0.3;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}
+.result-card{border:1px solid #e0e0e0;border-radius:12px;padding:1.25rem;margin-bottom:1rem;background:#fff}
+.result-num{display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:0.06em;color:#0F6E56;background:#E1F5EE;border-radius:20px;padding:3px 10px;margin-bottom:8px}
+.result-title{font-size:16px;font-weight:600;color:#1a1a1a;margin-bottom:6px}
+.result-body{font-size:13px;color:#555;line-height:1.7}
+.axis-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.axis-tag{font-size:11px;padding:3px 8px;border-radius:20px;font-weight:500}
+.tag-rare{background:#EEEDFE;color:#3C3489}
+.tag-market{background:#FAEEDA;color:#633806}
+.tag-repro{background:#E6F1FB;color:#0C447C}
+.fq-section{margin-top:1rem}
+.fq-card{border:1px solid #e0e0e0;border-radius:12px;padding:1rem 1.25rem;margin-bottom:0.75rem;background:#fff;transition:border-color 0.2s}
+.fq-card:hover{border-color:#5DCAA5}
+.fq-num{font-size:10px;letter-spacing:0.06em;color:#0F6E56;background:#E1F5EE;border-radius:20px;padding:2px 8px;display:inline-block;margin-bottom:8px}
+.fq-question{font-size:13px;font-weight:500;color:#1a1a1a;margin-bottom:10px;line-height:1.6}
+.fq-answer-area{margin-top:8px;display:none}
+.fq-answer-area.open{display:block}
+.fq-submit{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#0F6E56;background:#E1F5EE;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-family:inherit;transition:background 0.15s;margin-top:6px}
+.fq-submit:hover{background:#9FE1CB}
+.fq-open-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#0F6E56;background:#E1F5EE;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-family:inherit;transition:background 0.15s}
+.fq-open-btn:hover{background:#9FE1CB}
+.ai-response{border:1px solid #e0e0e0;border-radius:8px;padding:1rem;background:#fafafa;font-size:13px;color:#333;line-height:1.7;margin-top:8px;white-space:pre-wrap}
+.divider{height:1px;background:#f0f0f0;margin:1.5rem 0}
+.pdf-section{border:1px solid #FAC775;border-radius:12px;padding:1rem 1.25rem;background:#FAEEDA;margin-top:0.5rem}
+.pdf-section p{font-size:13px;color:#633806;line-height:1.6;margin-bottom:10px}
+.error-box{border:1px solid #fca5a5;border-radius:12px;padding:1rem;background:#fef2f2;font-size:13px;color:#dc2626;margin-bottom:1rem}
+canvas{border-radius:8px;border:1px solid #e0e0e0;background:#fafafa;width:100%;display:block;margin-bottom:1.5rem}
+@media(max-width:600px){
+  .steps-grid{grid-template-columns:repeat(2,1fr)}
+  .grid2,.grid3{grid-template-columns:1fr}
+  h1{font-size:20px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="progress-wrap">
+  <div class="progress-bar">
+    <div class="progress-step current" id="p0"></div>
+    <div class="progress-step" id="p1"></div>
+    <div class="progress-step" id="p2"></div>
+    <div class="progress-step" id="p3"></div>
+    <div class="progress-step" id="p4"></div>
+  </div>
+  <div class="progress-labels">
+    <div class="progress-label current" id="pl0">はじめに</div>
+    <div class="progress-label" id="pl1">プロフィール</div>
+    <div class="progress-label" id="pl2">ライフライン</div>
+    <div class="progress-label" id="pl3">スキル評価</div>
+    <div class="progress-label" id="pl4">結果・深掘り</div>
+  </div>
+</div>
+
+<!-- Step 0 -->
+<div class="step active" id="step-0">
+  <div class="tag">リスキリングのための持ち味発見</div>
+  <h1>あなたの「持ち味」を活かして<br>新しいスキルへ踏み出そう</h1>
+  <p class="lead">リスキリングとは、単に新しい技術を学ぶことではありません。あなたがこれまで培ってきた経験・強み・価値観——つまり「持ち味」を土台にして、次のキャリアに必要なスキルを見極め、自分らしく学び直すことです。</p>
+  <div class="hero">
+    <div class="hero-title">持ち味とは？</div>
+    <div class="hero-text">強みも弱みも含めた「あなたらしさ」のこと。長年培ってきた経験や知識、さらには失敗さえも持ち味として再定義します。その持ち味を知ることで、何をリスキリングすべきかが自然と見えてきます。</div>
+  </div>
+  <div class="steps-grid">
+    <div class="step-icon-card"><i class="ti ti-user" style="color:#1D9E75"></i><div class="step-icon-name">プロフィール</div><div class="step-icon-desc">基本情報・SNS</div></div>
+    <div class="step-icon-card"><i class="ti ti-timeline" style="color:#1D9E75"></i><div class="step-icon-name">ライフライン</div><div class="step-icon-desc">経験を時系列で振り返る</div></div>
+    <div class="step-icon-card"><i class="ti ti-star" style="color:#EF9F27"></i><div class="step-icon-name">スキル評価</div><div class="step-icon-desc">社会人基礎力5段階</div></div>
+    <div class="step-icon-card"><i class="ti ti-message-circle" style="color:#BA7517"></i><div class="step-icon-name">AI分析・深掘り</div><div class="step-icon-desc">持ち味を発見</div></div>
+  </div>
+  <p class="note" style="margin-bottom:1.5rem">所要時間：約10〜15分 ／ すべての項目は任意です</p>
+  <button class="btn-primary" onclick="goStep(1)">はじめる <i class="ti ti-arrow-right"></i></button>
+</div>
+
+<!-- Step 1 -->
+<div class="step" id="step-1">
+  <div class="tag">ステップ 1 / 4</div>
+  <h2>プロフィール</h2>
+  <p class="lead">基本情報を入力してください。<span class="opt">任意</span>は空欄でも進めます。</p>
+  <div class="card">
+    <div class="card-title">基本情報</div>
+    <div class="grid2">
+      <div class="field"><label>お名前</label><input type="text" id="p_name" placeholder="例：山田 太郎"></div>
+      <div class="field"><label>年齢 <span class="opt">任意</span></label><input type="number" id="p_age" placeholder="45" min="15" max="100"></div>
+    </div>
+    <div class="grid3">
+      <div class="field"><label>性別 <span class="opt">任意</span></label>
+        <select id="p_gender"><option value="">選択</option><option>男性</option><option>女性</option><option>その他</option><option>回答しない</option></select></div>
+      <div class="field"><label>都道府県 <span class="opt">任意</span></label>
+        <select id="p_pref"><option value="">選択</option><option>北海道</option><option>青森県</option><option>岩手県</option><option>宮城県</option><option>秋田県</option><option>山形県</option><option>福島県</option><option>茨城県</option><option>栃木県</option><option>群馬県</option><option>埼玉県</option><option>千葉県</option><option>東京都</option><option>神奈川県</option><option>新潟県</option><option>富山県</option><option>石川県</option><option>福井県</option><option>山梨県</option><option>長野県</option><option>岐阜県</option><option>静岡県</option><option>愛知県</option><option>三重県</option><option>滋賀県</option><option>京都府</option><option>大阪府</option><option>兵庫県</option><option>奈良県</option><option>和歌山県</option><option>鳥取県</option><option>島根県</option><option>岡山県</option><option>広島県</option><option>山口県</option><option>徳島県</option><option>香川県</option><option>愛媛県</option><option>高知県</option><option>福岡県</option><option>佐賀県</option><option>長崎県</option><option>熊本県</option><option>大分県</option><option>宮崎県</option><option>鹿児島県</option><option>沖縄県</option></select></div>
+      <div class="field"><label>職業・役職 <span class="opt">任意</span></label><input type="text" id="p_job" placeholder="例：エンジニア"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">SNS・Web <span class="opt">すべて任意</span></div>
+    <div class="sns-row"><div class="sns-icon" style="background:#000;color:#fff"><i class="ti ti-brand-x"></i></div><input type="url" id="sns_x" placeholder="https://x.com/yourname"></div>
+    <div class="sns-row"><div class="sns-icon" style="background:#1877F2;color:#fff"><i class="ti ti-brand-facebook"></i></div><input type="url" id="sns_fb" placeholder="https://facebook.com/yourname"></div>
+    <div class="sns-row"><div class="sns-icon" style="background:#0A66C2;color:#fff"><i class="ti ti-brand-linkedin"></i></div><input type="url" id="sns_li" placeholder="https://linkedin.com/in/yourname"></div>
+    <div class="sns-row"><div class="sns-icon" style="background:#E4405F;color:#fff"><i class="ti ti-brand-instagram"></i></div><input type="url" id="sns_ig" placeholder="https://instagram.com/yourname"></div>
+    <div class="sns-row"><div class="sns-icon" style="background:#1D9E75;color:#fff"><i class="ti ti-world"></i></div><input type="url" id="sns_web" placeholder="https://yourwebsite.com"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn-secondary" onclick="goStep(0)"><i class="ti ti-arrow-left"></i> 戻る</button>
+    <button class="btn-primary" onclick="goStep(2)">次へ <i class="ti ti-arrow-right"></i></button>
+  </div>
+</div>
+
+<!-- Step 2 -->
+<div class="step" id="step-2">
+  <div class="tag">ステップ 2 / 4</div>
+  <h2>ライフラインチャート</h2>
+  <p class="lead">人生の各時期を振り返り、幸福度（−100〜100）と出来事を入力してください。特に「やりがいを感じた経験」「うまくいった仕事」に注目してみましょう。</p>
+  <div id="periodsContainer"></div>
+  <button class="btn-secondary" onclick="addPeriod()" style="margin-bottom:1rem;font-size:13px"><i class="ti ti-plus"></i> 時期を追加</button>
+  <canvas id="lifeline" height="80"></canvas>
+  <div class="btn-row">
+    <button class="btn-secondary" onclick="goStep(1)"><i class="ti ti-arrow-left"></i> 戻る</button>
+    <button class="btn-primary" onclick="goStep(3)">次へ <i class="ti ti-arrow-right"></i></button>
+  </div>
+</div>
+
+<!-- Step 3 -->
+<div class="step" id="step-3">
+  <div class="tag">ステップ 3 / 4</div>
+  <h2>社会人基礎力 スキル評価</h2>
+  <p class="lead">各スキルについて、自分の強さを★で5段階評価してください。</p>
+  <div id="skillsContainer"></div>
+  <div class="btn-row">
+    <button class="btn-secondary" onclick="goStep(2)"><i class="ti ti-arrow-left"></i> 戻る</button>
+    <button class="btn-primary" onclick="goStep(4)">AI分析を依頼する <i class="ti ti-sparkles"></i></button>
+  </div>
+</div>
+
+<!-- Step 4 -->
+<div class="step" id="step-4">
+  <div class="tag">ステップ 4 / 4 — 結果・深掘り</div>
+  <h2>持ち味分析レポート</h2>
+  <div id="analysisArea">
+    <div class="loading-box">
+      <div><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div>
+      <p style="font-size:13px;color:#888;margin-top:12px">AIが持ち味を分析しています...</p>
+    </div>
+  </div>
+  <div id="followupSection" style="display:none">
+    <div class="divider"></div>
+    <p style="font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:4px"><i class="ti ti-message-circle"></i> コーチング用フォローアップ質問</p>
+    <p class="note" style="margin-bottom:12px">気になる質問をクリックして、回答を入力するとAIがさらに深掘りします。</p>
+    <div class="fq-section" id="fqContainer"></div>
+    <div class="divider"></div>
+    <div class="pdf-section">
+      <p><i class="ti ti-file-type-pdf"></i> ここまでの分析結果をPDFレポートとして保存できます。<br>フォローアップ質問の回答後に出力するとより充実した内容になります。</p>
+      <button class="btn-amber" onclick="downloadPdf()"><i class="ti ti-download"></i> PDFに出力する</button>
+    </div>
+  </div>
+  <div class="btn-row" style="margin-top:1.5rem">
+    <button class="btn-secondary" onclick="goStep(0)"><i class="ti ti-refresh"></i> 最初からやり直す</button>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// ============================================================
+//  設定：Vercelの環境変数から取得（直接書かない）
+// ============================================================
+const API_KEY = window.__ENV__?.ANTHROPIC_API_KEY || '';
+
+const SKILLS=[
+  {cat:"前に踏み出す力",name:"主体性",desc:"進んで物事に取り組む"},
+  {cat:"前に踏み出す力",name:"働きかけ力",desc:"他人を巻き込む"},
+  {cat:"前に踏み出す力",name:"実行力",desc:"目的を設定し行動する"},
+  {cat:"考え抜く力",name:"課題発見力",desc:"課題を明らかにする"},
+  {cat:"考え抜く力",name:"計画力",desc:"プロセスを整理する"},
+  {cat:"考え抜く力",name:"創造力",desc:"新しい価値を生み出す"},
+  {cat:"チームで働く力",name:"発信力",desc:"自分の意見を伝える"},
+  {cat:"チームで働く力",name:"傾聴力",desc:"相手の意見を聴く"},
+  {cat:"チームで働く力",name:"柔軟性",desc:"違いを理解し受け入れる"},
+  {cat:"チームで働く力",name:"情況把握力",desc:"関係性を理解する"},
+  {cat:"チームで働く力",name:"規律性",desc:"ルールや約束を守る"},
+  {cat:"チームで働く力",name:"ストレス対応",desc:"発生源に対応する"},
+];
+
+let skillRatings={};
+SKILLS.forEach(s=>skillRatings[s.name]=0);
+let periods=[{label:"時期1",score:0,event:""},{label:"時期2",score:0,event:""},{label:"時期3",score:0,event:""}];
+let currentStep=0;
+let analysisResult='';
+let fqAnswers={};
+
+function renderPeriods(){
+  const c=document.getElementById("periodsContainer");c.innerHTML="";
+  periods.forEach((p,i)=>{
+    const sl=(p.score>0?"+":"")+p.score;
+    const d=document.createElement("div");d.className="period-card";
+    d.innerHTML=`
+      <div class="period-header">
+        <div class="period-num">${i+1}</div>
+        <input class="period-title-input" value="${p.label}" placeholder="例：学生時代" oninput="periods[${i}].label=this.value;drawLifeline()">
+      </div>
+      <div class="slider-row">
+        <span class="slider-label">幸福度</span>
+        <input type="range" min="-100" max="100" step="1" value="${p.score}" oninput="periods[${i}].score=parseInt(this.value);this.nextElementSibling.textContent=(parseInt(this.value)>0?'+':'')+this.value;drawLifeline()">
+        <span class="slider-val">${sl}</span>
+      </div>
+      <textarea placeholder="この時期の主な出来事・やりがいを感じた経験" oninput="periods[${i}].event=this.value">${p.event}</textarea>
+      ${periods.length>2?`<div style="text-align:right;margin-top:4px"><button onclick="removePeriod(${i})" style="font-size:11px;color:#999;background:none;border:none;cursor:pointer">削除</button></div>`:""}
+    `;
+    c.appendChild(d);
+  });drawLifeline();
+}
+
+function addPeriod(){periods.push({label:"時期"+(periods.length+1),score:0,event:""});renderPeriods()}
+function removePeriod(i){periods.splice(i,1);renderPeriods()}
+
+function drawLifeline(){
+  const canvas=document.getElementById("lifeline");if(!canvas)return;
+  const dpr=window.devicePixelRatio||1,W=canvas.offsetWidth||680,H=80;
+  canvas.width=W*dpr;canvas.height=H*dpr;
+  const ctx=canvas.getContext("2d");ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
+  const mid=H/2;
+  ctx.strokeStyle="rgba(0,0,0,0.1)";ctx.lineWidth=0.5;
+  ctx.beginPath();ctx.moveTo(16,mid);ctx.lineTo(W-16,mid);ctx.stroke();
+  if(periods.length<2)return;
+  const step=(W-32)/(periods.length-1);
+  const pts=periods.map((p,i)=>({x:16+i*step,y:mid-(p.score/100)*(mid-8)}));
+  ctx.strokeStyle="#1D9E75";ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+  for(let i=1;i<pts.length;i++){const cpx=pts[i-1].x+(pts[i].x-pts[i-1].x)*0.5;ctx.bezierCurveTo(cpx,pts[i-1].y,cpx,pts[i].y,pts[i].x,pts[i].y)}
+  ctx.stroke();
+  pts.forEach(pt=>{ctx.fillStyle="#1D9E75";ctx.beginPath();ctx.arc(pt.x,pt.y,4,0,Math.PI*2);ctx.fill()});
+}
+
+function renderSkills(){
+  const container=document.getElementById("skillsContainer");container.innerHTML="";
+  const cats=[...new Set(SKILLS.map(s=>s.cat))];
+  cats.forEach(cat=>{
+    const sec=document.createElement("div");sec.className="skill-section";
+    sec.innerHTML=`<div class="skill-section-hd">${cat}</div>`;
+    SKILLS.filter(s=>s.cat===cat).forEach(s=>{
+      const key=s.name.replace(/\s/g,"");
+      const row=document.createElement("div");row.className="skill-row";
+      row.innerHTML=`
+        <div class="skill-info"><div class="skill-name">${s.name}</div><div class="skill-desc">${s.desc}</div></div>
+        <div class="stars" id="stars-${key}">
+          ${[1,2,3,4,5].map(n=>`<span class="star" data-val="${n}" onclick="setRating('${s.name}',${n})">★</span>`).join("")}
+        </div>`;
+      sec.appendChild(row);
+    });
+    container.appendChild(sec);
+  });
+}
+
+function setRating(name,val){
+  skillRatings[name]=val;
+  const key=name.replace(/\s/g,"");
+  document.querySelectorAll(`#stars-${key} .star`).forEach(s=>s.classList.toggle("on",parseInt(s.dataset.val)<=val));
+}
+
+function goStep(n){
+  document.getElementById("step-"+currentStep).classList.remove("active");
+  currentStep=n;
+  document.getElementById("step-"+n).classList.add("active");
+  ["p0","p1","p2","p3","p4"].forEach((id,i)=>{
+    document.getElementById(id).className="progress-step"+(i<n?" done":i===n?" current":"");
+  });
+  ["pl0","pl1","pl2","pl3","pl4"].forEach((id,i)=>{
+    document.getElementById(id).className="progress-label"+(i===n?" current":"");
+  });
+  window.scrollTo(0,0);
+  if(n===2)setTimeout(drawLifeline,100);
+  if(n===4)runAnalysis();
+}
+
+function getVal(id){return(document.getElementById(id)?.value||"").trim()}
+
+function buildPrompt(){
+  const prof=[
+    getVal("p_name")?"名前："+getVal("p_name"):null,
+    getVal("p_age")?"年齢："+getVal("p_age")+"歳":null,
+    getVal("p_gender")?"性別："+getVal("p_gender"):null,
+    getVal("p_pref")?"居住地："+getVal("p_pref"):null,
+    getVal("p_job")?"職業・役職："+getVal("p_job"):null,
+    getVal("sns_x")?"X："+getVal("sns_x"):null,
+    getVal("sns_fb")?"Facebook："+getVal("sns_fb"):null,
+    getVal("sns_li")?"LinkedIn："+getVal("sns_li"):null,
+    getVal("sns_ig")?"Instagram："+getVal("sns_ig"):null,
+    getVal("sns_web")?"Webサイト："+getVal("sns_web"):null,
+  ].filter(Boolean).join("\n");
+  const ll=periods.map((p,i)=>`時期${i+1}「${p.label}」：幸福度${p.score}、出来事：${p.event||"（未記入）"}`).join("\n");
+  const sk=SKILLS.map(s=>`${s.name}（${s.cat}）：${"★".repeat(skillRatings[s.name])}${"☆".repeat(5-skillRatings[s.name])} ${skillRatings[s.name]}/5`).join("\n");
+  return `【リスキリングのための持ち味発見セッション】
+
+■プロフィール
+${prof||"（未入力）"}
+
+■ライフライン
+${ll}
+
+■社会人基礎力（5段階評価）
+${sk}
+
+以下の3点を日本語で分析してください。
+1. 希少性・市場性・再現性の3軸で「持ち味」を3〜4個、タイトルと説明・3軸評価を含めて抽出する
+2. ライフラインの幸福度パターンから、この人がやりがいを感じる場面・価値観を読み解く
+3. その持ち味を土台に、次のキャリアに向けてリスキリングすべき分野・スキルを具体的に提案する
+最後に「コーチング用フォローアップ質問」として3つの質問を提示してください。各質問は「Q1：」「Q2：」「Q3：」で始めてください。`;
+}
+
+async function callClaude(prompt){
+  const res=await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "x-api-key": API_KEY,
+      "anthropic-version":"2023-06-01",
+      "anthropic-dangerous-direct-browser-access":"true"
+    },
+    body:JSON.stringify({
+      model:"claude-sonnet-4-20250514",
+      max_tokens:2000,
+      messages:[{role:"user",content:prompt}]
+    })
+  });
+  if(!res.ok)throw new Error("API Error: "+res.status);
+  const data=await res.json();
+  return data.content.map(c=>c.text||"").join("");
+}
+
+async function runAnalysis(){
+  document.getElementById("analysisArea").innerHTML=`
+    <div class="loading-box">
+      <div><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div>
+      <p style="font-size:13px;color:#888;margin-top:12px">AIが持ち味を分析しています...</p>
+    </div>`;
+  document.getElementById("followupSection").style.display="none";
+  try{
+    const result=await callClaude(buildPrompt());
+    analysisResult=result;
+    // フォローアップ質問を抽出
+    const fqs=[];
+    const lines=result.split("\n");
+    lines.forEach(line=>{
+      const m=line.match(/^Q([1-3])[:：]\s*(.+)/);
+      if(m)fqs.push({num:m[1],q:m[2].trim()});
+    });
+    // 結果表示
+    document.getElementById("analysisArea").innerHTML=`
+      <div style="font-size:13px;color:#333;line-height:1.8;white-space:pre-wrap;background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:1.25rem">${result}</div>`;
+    // フォローアップ
+    if(fqs.length>0){
+      const fqContainer=document.getElementById("fqContainer");
+      fqContainer.innerHTML="";
+      fqs.forEach(({num,q})=>{
+        const card=document.createElement("div");card.className="fq-card";
+        card.innerHTML=`
+          <div class="fq-num">質問 ${num}</div>
+          <div class="fq-question">${q}</div>
+          <button class="fq-open-btn" onclick="toggleFq(${num})"><i class="ti ti-edit"></i> この質問に答える</button>
+          <div class="fq-answer-area" id="fqa-${num}">
+            <textarea id="fq-text-${num}" placeholder="ここに回答を入力してください..." style="min-height:80px;margin-top:8px"></textarea>
+            <button class="fq-submit" onclick="submitFq(${num},'${q.replace(/'/g,"\\'")}')"><i class="ti ti-sparkles"></i> Claudeに深掘りしてもらう</button>
+            <div id="fq-resp-${num}"></div>
+          </div>`;
+        fqContainer.appendChild(card);
+      });
+      document.getElementById("followupSection").style.display="block";
+    }
+  }catch(e){
+    document.getElementById("analysisArea").innerHTML=`
+      <div class="error-box">エラーが発生しました：${e.message}<br><br>
+      <button class="btn-secondary" onclick="runAnalysis()"><i class="ti ti-refresh"></i> 再試行する</button></div>`;
+  }
+}
+
+function toggleFq(num){
+  const area=document.getElementById("fqa-"+num);
+  area.classList.toggle("open");
+}
+
+async function submitFq(num,question){
+  const answer=document.getElementById("fq-text-"+num).value.trim();
+  if(!answer)return;
+  const respEl=document.getElementById("fq-resp-"+num);
+  respEl.innerHTML=`<div class="loading-box" style="padding:1rem"><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div>`;
+  try{
+    const prompt=`以下は持ち味発見セッションのフォローアップ質問への回答です。
+質問：${question}
+回答：${answer}
+
+この回答をもとに、リスキリングの観点から具体的なアドバイスと次のアクションを200〜300字で提案してください。`;
+    const result=await callClaude(prompt);
+    fqAnswers[num]={q:question,a:answer,resp:result};
+    respEl.innerHTML=`<div class="ai-response">${result}</div>`;
+  }catch(e){
+    respEl.innerHTML=`<div class="error-box">エラー：${e.message}</div>`;
+  }
+}
+
+function downloadPdf(){
+  const name=getVal("p_name")||"ユーザー";
+  const content=`リスキリングのための持ち味発見レポート
+氏名：${name}
+作成日：${new Date().toLocaleDateString("ja-JP")}
+
+━━━━━━━━━━━━━━━━━━━━━━
+■ 持ち味分析結果
+━━━━━━━━━━━━━━━━━━━━━━
+${analysisResult}
+
+${Object.keys(fqAnswers).length>0?`━━━━━━━━━━━━━━━━━━━━━━
+■ フォローアップ Q&A
+━━━━━━━━━━━━━━━━━━━━━━
+${Object.values(fqAnswers).map(f=>`Q：${f.q}\nA：${f.a}\nClaudeより：${f.resp}`).join("\n\n")}`:""}`;
+  const blob=new Blob([content],{type:"text/plain;charset=utf-8"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download=`持ち味発見レポート_${name}.txt`;
+  a.click();URL.revokeObjectURL(url);
+}
+
+renderPeriods();
+renderSkills();
+setTimeout(drawLifeline,150);
+</script>
+</body>
+</html>
