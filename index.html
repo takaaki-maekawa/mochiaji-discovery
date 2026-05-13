@@ -77,37 +77,25 @@ textarea::placeholder{color:#bbb}
 .btn-amber{display:inline-flex;align-items:center;gap:6px;background:#BA7517;color:white;border:none;border-radius:8px;padding:11px 22px;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s;font-family:inherit}
 .btn-amber:hover{background:#854F0B}
 .btn-row{display:flex;gap:10px;margin-top:1.5rem;align-items:center;flex-wrap:wrap}
-.confirm-box{border:1px solid #5DCAA5;border-radius:12px;padding:1.25rem;background:#E1F5EE;margin-bottom:1.25rem}
-.confirm-box p{font-size:13px;color:#0F6E56;line-height:1.7}
 .loading-box{border:1px solid #e0e0e0;border-radius:12px;padding:2rem;text-align:center;background:#fafafa;margin-bottom:1rem}
 .loading-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#1D9E75;animation:pulse 1.2s ease-in-out infinite;margin:0 3px}
 .loading-dot:nth-child(2){animation-delay:0.2s}.loading-dot:nth-child(3){animation-delay:0.4s}
 @keyframes pulse{0%,80%,100%{opacity:0.3;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}
-.result-card{border:1px solid #e0e0e0;border-radius:12px;padding:1.25rem;margin-bottom:1rem;background:#fff}
-.result-num{display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:0.06em;color:#0F6E56;background:#E1F5EE;border-radius:20px;padding:3px 10px;margin-bottom:8px}
-.result-title{font-size:16px;font-weight:600;color:#1a1a1a;margin-bottom:6px}
-.result-body{font-size:13px;color:#555;line-height:1.7}
-.axis-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.axis-tag{font-size:11px;padding:3px 8px;border-radius:20px;font-weight:500}
-.tag-rare{background:#EEEDFE;color:#3C3489}
-.tag-market{background:#FAEEDA;color:#633806}
-.tag-repro{background:#E6F1FB;color:#0C447C}
-.fq-section{margin-top:1rem}
 .fq-card{border:1px solid #e0e0e0;border-radius:12px;padding:1rem 1.25rem;margin-bottom:0.75rem;background:#fff;transition:border-color 0.2s}
 .fq-card:hover{border-color:#5DCAA5}
 .fq-num{font-size:10px;letter-spacing:0.06em;color:#0F6E56;background:#E1F5EE;border-radius:20px;padding:2px 8px;display:inline-block;margin-bottom:8px}
 .fq-question{font-size:13px;font-weight:500;color:#1a1a1a;margin-bottom:10px;line-height:1.6}
 .fq-answer-area{margin-top:8px;display:none}
 .fq-answer-area.open{display:block}
-.fq-submit{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#0F6E56;background:#E1F5EE;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-family:inherit;transition:background 0.15s;margin-top:6px}
+.fq-submit{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#0F6E56;background:#E1F5EE;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-family:inherit;margin-top:6px}
 .fq-submit:hover{background:#9FE1CB}
-.fq-open-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#0F6E56;background:#E1F5EE;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-family:inherit;transition:background 0.15s}
+.fq-open-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#0F6E56;background:#E1F5EE;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-family:inherit}
 .fq-open-btn:hover{background:#9FE1CB}
 .ai-response{border:1px solid #e0e0e0;border-radius:8px;padding:1rem;background:#fafafa;font-size:13px;color:#333;line-height:1.7;margin-top:8px;white-space:pre-wrap}
 .divider{height:1px;background:#f0f0f0;margin:1.5rem 0}
 .pdf-section{border:1px solid #FAC775;border-radius:12px;padding:1rem 1.25rem;background:#FAEEDA;margin-top:0.5rem}
 .pdf-section p{font-size:13px;color:#633806;line-height:1.6;margin-bottom:10px}
-.error-box{border:1px solid #fca5a5;border-radius:12px;padding:1rem;background:#fef2f2;font-size:13px;color:#dc2626;margin-bottom:1rem}
+.error-box{border:1px solid #fca5a5;border-radius:12px;padding:1rem;background:#fef2f2;font-size:13px;color:#dc2626;margin-bottom:1rem;line-height:1.6}
 canvas{border-radius:8px;border:1px solid #e0e0e0;background:#fafafa;width:100%;display:block;margin-bottom:1.5rem}
 @media(max-width:600px){
   .steps-grid{grid-template-columns:repeat(2,1fr)}
@@ -227,12 +215,12 @@ canvas{border-radius:8px;border:1px solid #e0e0e0;background:#fafafa;width:100%;
   <div id="followupSection" style="display:none">
     <div class="divider"></div>
     <p style="font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:4px"><i class="ti ti-message-circle"></i> コーチング用フォローアップ質問</p>
-    <p class="note" style="margin-bottom:12px">気になる質問をクリックして、回答を入力するとAIがさらに深掘りします。</p>
-    <div class="fq-section" id="fqContainer"></div>
+    <p class="note" style="margin-bottom:12px">気になる質問をクリックして回答を入力すると、AIがさらに深掘りします。</p>
+    <div id="fqContainer"></div>
     <div class="divider"></div>
     <div class="pdf-section">
-      <p><i class="ti ti-file-type-pdf"></i> ここまでの分析結果をPDFレポートとして保存できます。<br>フォローアップ質問の回答後に出力するとより充実した内容になります。</p>
-      <button class="btn-amber" onclick="downloadPdf()"><i class="ti ti-download"></i> PDFに出力する</button>
+      <p><i class="ti ti-file-type-pdf"></i> ここまでの分析結果をテキストファイルとして保存できます。</p>
+      <button class="btn-amber" onclick="downloadReport()"><i class="ti ti-download"></i> レポートを保存する</button>
     </div>
   </div>
   <div class="btn-row" style="margin-top:1.5rem">
@@ -240,14 +228,9 @@ canvas{border-radius:8px;border:1px solid #e0e0e0;background:#fafafa;width:100%;
   </div>
 </div>
 
-</div><!-- /container -->
+</div>
 
 <script>
-// ============================================================
-//  設定：Vercelの環境変数から取得（直接書かない）
-// ============================================================
-const API_KEY = window.__ENV__?.ANTHROPIC_API_KEY || '';
-
 const SKILLS=[
   {cat:"前に踏み出す力",name:"主体性",desc:"進んで物事に取り組む"},
   {cat:"前に踏み出す力",name:"働きかけ力",desc:"他人を巻き込む"},
@@ -389,22 +372,19 @@ ${sk}
 最後に「コーチング用フォローアップ質問」として3つの質問を提示してください。各質問は「Q1：」「Q2：」「Q3：」で始めてください。`;
 }
 
-async function callClaude(prompt){
-  const res=await fetch("https://api.anthropic.com/v1/messages",{
+async function callAPI(prompt){
+  const res=await fetch("/api/chat",{
     method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      "x-api-key": API_KEY,
-      "anthropic-version":"2023-06-01",
-      "anthropic-dangerous-direct-browser-access":"true"
-    },
+    headers:{"Content-Type":"application/json"},
     body:JSON.stringify({
-      model:"claude-sonnet-4-20250514",
-      max_tokens:2000,
-      messages:[{role:"user",content:prompt}]
+      messages:[{role:"user",content:prompt}],
+      max_tokens:2000
     })
   });
-  if(!res.ok)throw new Error("API Error: "+res.status);
+  if(!res.ok){
+    const err=await res.json();
+    throw new Error(err.error||"APIエラー: "+res.status);
+  }
   const data=await res.json();
   return data.content.map(c=>c.text||"").join("");
 }
@@ -417,19 +397,15 @@ async function runAnalysis(){
     </div>`;
   document.getElementById("followupSection").style.display="none";
   try{
-    const result=await callClaude(buildPrompt());
+    const result=await callAPI(buildPrompt());
     analysisResult=result;
-    // フォローアップ質問を抽出
     const fqs=[];
-    const lines=result.split("\n");
-    lines.forEach(line=>{
+    result.split("\n").forEach(line=>{
       const m=line.match(/^Q([1-3])[:：]\s*(.+)/);
       if(m)fqs.push({num:m[1],q:m[2].trim()});
     });
-    // 結果表示
     document.getElementById("analysisArea").innerHTML=`
       <div style="font-size:13px;color:#333;line-height:1.8;white-space:pre-wrap;background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:1.25rem">${result}</div>`;
-    // フォローアップ
     if(fqs.length>0){
       const fqContainer=document.getElementById("fqContainer");
       fqContainer.innerHTML="";
@@ -441,7 +417,7 @@ async function runAnalysis(){
           <button class="fq-open-btn" onclick="toggleFq(${num})"><i class="ti ti-edit"></i> この質問に答える</button>
           <div class="fq-answer-area" id="fqa-${num}">
             <textarea id="fq-text-${num}" placeholder="ここに回答を入力してください..." style="min-height:80px;margin-top:8px"></textarea>
-            <button class="fq-submit" onclick="submitFq(${num},'${q.replace(/'/g,"\\'")}')"><i class="ti ti-sparkles"></i> Claudeに深掘りしてもらう</button>
+            <button class="fq-submit" onclick="submitFq(${num},'${q.replace(/'/g,"\\'").replace(/\n/g," ")}')"><i class="ti ti-sparkles"></i> AIに深掘りしてもらう</button>
             <div id="fq-resp-${num}"></div>
           </div>`;
         fqContainer.appendChild(card);
@@ -450,14 +426,15 @@ async function runAnalysis(){
     }
   }catch(e){
     document.getElementById("analysisArea").innerHTML=`
-      <div class="error-box">エラーが発生しました：${e.message}<br><br>
-      <button class="btn-secondary" onclick="runAnalysis()"><i class="ti ti-refresh"></i> 再試行する</button></div>`;
+      <div class="error-box">
+        <strong>エラーが発生しました</strong><br>${e.message}<br><br>
+        <button class="btn-secondary" onclick="runAnalysis()"><i class="ti ti-refresh"></i> 再試行する</button>
+      </div>`;
   }
 }
 
 function toggleFq(num){
-  const area=document.getElementById("fqa-"+num);
-  area.classList.toggle("open");
+  document.getElementById("fqa-"+num).classList.toggle("open");
 }
 
 async function submitFq(num,question){
@@ -469,9 +446,8 @@ async function submitFq(num,question){
     const prompt=`以下は持ち味発見セッションのフォローアップ質問への回答です。
 質問：${question}
 回答：${answer}
-
 この回答をもとに、リスキリングの観点から具体的なアドバイスと次のアクションを200〜300字で提案してください。`;
-    const result=await callClaude(prompt);
+    const result=await callAPI(prompt);
     fqAnswers[num]={q:question,a:answer,resp:result};
     respEl.innerHTML=`<div class="ai-response">${result}</div>`;
   }catch(e){
@@ -479,21 +455,11 @@ async function submitFq(num,question){
   }
 }
 
-function downloadPdf(){
+function downloadReport(){
   const name=getVal("p_name")||"ユーザー";
-  const content=`リスキリングのための持ち味発見レポート
-氏名：${name}
-作成日：${new Date().toLocaleDateString("ja-JP")}
-
-━━━━━━━━━━━━━━━━━━━━━━
-■ 持ち味分析結果
-━━━━━━━━━━━━━━━━━━━━━━
-${analysisResult}
-
-${Object.keys(fqAnswers).length>0?`━━━━━━━━━━━━━━━━━━━━━━
-■ フォローアップ Q&A
-━━━━━━━━━━━━━━━━━━━━━━
-${Object.values(fqAnswers).map(f=>`Q：${f.q}\nA：${f.a}\nClaudeより：${f.resp}`).join("\n\n")}`:""}`;
+  const fqSection=Object.keys(fqAnswers).length>0
+    ?`\n━━━━━━━━━━━━━━━━━━━━━━\n■ フォローアップ Q&A\n━━━━━━━━━━━━━━━━━━━━━━\n${Object.values(fqAnswers).map(f=>`Q：${f.q}\nA：${f.a}\nClaudeより：${f.resp}`).join("\n\n")}`:"";
+  const content=`リスキリングのための持ち味発見レポート\n氏名：${name}\n作成日：${new Date().toLocaleDateString("ja-JP")}\n\n━━━━━━━━━━━━━━━━━━━━━━\n■ 持ち味分析結果\n━━━━━━━━━━━━━━━━━━━━━━\n${analysisResult}${fqSection}`;
   const blob=new Blob([content],{type:"text/plain;charset=utf-8"});
   const url=URL.createObjectURL(blob);
   const a=document.createElement("a");
