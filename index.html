@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>リスキリングのための持ち味発見</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Helvetica Neue',Arial,'Hiragino Kaku Gothic ProN','Hiragino Sans',Meiryo,sans-serif;background:#f8faf9;color:#1a1a1a;min-height:100vh}
@@ -76,6 +77,8 @@ textarea::placeholder{color:#bbb}
 .btn-secondary:hover{background:#f5f5f5}
 .btn-amber{display:inline-flex;align-items:center;gap:6px;background:#BA7517;color:white;border:none;border-radius:8px;padding:11px 22px;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s;font-family:inherit}
 .btn-amber:hover{background:#854F0B}
+.btn-green{display:inline-flex;align-items:center;gap:6px;background:#0F6E56;color:white;border:none;border-radius:8px;padding:11px 22px;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s;font-family:inherit}
+.btn-green:hover{background:#0a5040}
 .btn-row{display:flex;gap:10px;margin-top:1.5rem;align-items:center;flex-wrap:wrap}
 .loading-box{border:1px solid #e0e0e0;border-radius:12px;padding:2rem;text-align:center;background:#fafafa;margin-bottom:1rem}
 .loading-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#1D9E75;animation:pulse 1.2s ease-in-out infinite;margin:0 3px}
@@ -93,14 +96,20 @@ textarea::placeholder{color:#bbb}
 .fq-open-btn:hover{background:#9FE1CB}
 .ai-response{border:1px solid #e0e0e0;border-radius:8px;padding:1rem;background:#fafafa;font-size:13px;color:#333;line-height:1.7;margin-top:8px;white-space:pre-wrap}
 .divider{height:1px;background:#f0f0f0;margin:1.5rem 0}
-.pdf-section{border:1px solid #FAC775;border-radius:12px;padding:1rem 1.25rem;background:#FAEEDA;margin-top:0.5rem}
-.pdf-section p{font-size:13px;color:#633806;line-height:1.6;margin-bottom:10px}
+.action-section{border:1px solid #e0e0e0;border-radius:12px;padding:1.25rem;background:#fff;margin-top:1rem}
+.action-section-title{font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:6px}
+.action-section-desc{font-size:12px;color:#888;line-height:1.6;margin-bottom:12px}
 .error-box{border:1px solid #fca5a5;border-radius:12px;padding:1rem;background:#fef2f2;font-size:13px;color:#dc2626;margin-bottom:1rem;line-height:1.6}
+.saved-badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#0F6E56;background:#E1F5EE;border-radius:20px;padding:4px 10px;margin-left:8px}
+.saved-box{border:1px solid #5DCAA5;border-radius:12px;padding:1rem 1.25rem;background:#E1F5EE;margin-bottom:1.25rem;display:none}
+.saved-box p{font-size:13px;color:#0F6E56;line-height:1.7}
 canvas{border-radius:8px;border:1px solid #e0e0e0;background:#fafafa;width:100%;display:block;margin-bottom:1.5rem}
 @media(max-width:600px){
   .steps-grid{grid-template-columns:repeat(2,1fr)}
   .grid2,.grid3{grid-template-columns:1fr}
   h1{font-size:20px}
+  .btn-row{flex-direction:column;align-items:stretch}
+  .btn-primary,.btn-secondary,.btn-amber,.btn-green{justify-content:center}
 }
 </style>
 </head>
@@ -129,6 +138,15 @@ canvas{border-radius:8px;border:1px solid #e0e0e0;background:#fafafa;width:100%;
   <div class="tag">リスキリングのための持ち味発見</div>
   <h1>あなたの「持ち味」を活かして<br>新しいスキルへ踏み出そう</h1>
   <p class="lead">リスキリングとは、単に新しい技術を学ぶことではありません。あなたがこれまで培ってきた経験・強み・価値観——つまり「持ち味」を土台にして、次のキャリアに必要なスキルを見極め、自分らしく学び直すことです。</p>
+
+  <div id="savedBox" class="saved-box">
+    <p><i class="ti ti-device-floppy"></i> 前回のデータが保存されています（<span id="savedName"></span>さん）。続きから始めますか？</p>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <button class="btn-primary" style="font-size:13px;padding:8px 14px" onclick="loadSaved()"><i class="ti ti-download"></i> 前回のデータを使う</button>
+      <button class="btn-secondary" style="font-size:13px;padding:8px 14px" onclick="startFresh()"><i class="ti ti-plus"></i> 新規で入力する</button>
+    </div>
+  </div>
+
   <div class="hero">
     <div class="hero-title">持ち味とは？</div>
     <div class="hero-text">強みも弱みも含めた「あなたらしさ」のこと。長年培ってきた経験や知識、さらには失敗さえも持ち味として再定義します。その持ち味を知ることで、何をリスキリングすべきかが自然と見えてきます。</div>
@@ -140,7 +158,7 @@ canvas{border-radius:8px;border:1px solid #e0e0e0;background:#fafafa;width:100%;
     <div class="step-icon-card"><i class="ti ti-message-circle" style="color:#BA7517"></i><div class="step-icon-name">AI分析・深掘り</div><div class="step-icon-desc">持ち味を発見</div></div>
   </div>
   <p class="note" style="margin-bottom:1.5rem">所要時間：約10〜15分 ／ すべての項目は任意です</p>
-  <button class="btn-primary" onclick="goStep(1)">はじめる <i class="ti ti-arrow-right"></i></button>
+  <button class="btn-primary" id="startBtn" onclick="startFresh()">はじめる <i class="ti ti-arrow-right"></i></button>
 </div>
 
 <!-- Step 1 -->
@@ -206,23 +224,40 @@ canvas{border-radius:8px;border:1px solid #e0e0e0;background:#fafafa;width:100%;
 <div class="step" id="step-4">
   <div class="tag">ステップ 4 / 4 — 結果・深掘り</div>
   <h2>持ち味分析レポート</h2>
+
   <div id="analysisArea">
     <div class="loading-box">
       <div><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div>
       <p style="font-size:13px;color:#888;margin-top:12px">AIが持ち味を分析しています...</p>
     </div>
   </div>
+
   <div id="followupSection" style="display:none">
     <div class="divider"></div>
     <p style="font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:4px"><i class="ti ti-message-circle"></i> コーチング用フォローアップ質問</p>
     <p class="note" style="margin-bottom:12px">気になる質問をクリックして回答を入力すると、AIがさらに深掘りします。</p>
     <div id="fqContainer"></div>
+
     <div class="divider"></div>
-    <div class="pdf-section">
-      <p><i class="ti ti-file-type-pdf"></i> ここまでの分析結果をテキストファイルとして保存できます。</p>
-      <button class="btn-amber" onclick="downloadReport()"><i class="ti ti-download"></i> レポートを保存する</button>
+
+    <!-- データ保存 -->
+    <div class="action-section">
+      <div class="action-section-title"><i class="ti ti-device-floppy"></i> 入力データを保存する</div>
+      <div class="action-section-desc">ライフライン・スキル評価・プロフィールを保存します。次回アクセス時に「前回のデータを使う」ボタンで読み込めます。</div>
+      <button class="btn-green" onclick="saveData()"><i class="ti ti-device-floppy"></i> データを保存する</button>
+      <span id="saveStatus"></span>
+    </div>
+
+    <div style="margin-top:1rem"></div>
+
+    <!-- PDF保存 -->
+    <div class="action-section">
+      <div class="action-section-title"><i class="ti ti-file-type-pdf"></i> PDFレポートに保存する</div>
+      <div class="action-section-desc">分析結果・フォローアップQ&Aをまとめてダウンロードできます。フォローアップ質問の回答後に保存するとより充実した内容になります。</div>
+      <button class="btn-amber" onclick="downloadPdf()"><i class="ti ti-download"></i> PDFに保存する</button>
     </div>
   </div>
+
   <div class="btn-row" style="margin-top:1.5rem">
     <button class="btn-secondary" onclick="goStep(0)"><i class="ti ti-refresh"></i> 最初からやり直す</button>
   </div>
@@ -253,6 +288,68 @@ let currentStep=0;
 let analysisResult='';
 let fqAnswers={};
 
+// ---- ローカルストレージによるデータ保存 ----
+function saveData(){
+  const data={
+    profile:{
+      name:getVal("p_name"),age:getVal("p_age"),gender:getVal("p_gender"),
+      pref:getVal("p_pref"),job:getVal("p_job"),
+      sns_x:getVal("sns_x"),sns_fb:getVal("sns_fb"),
+      sns_li:getVal("sns_li"),sns_ig:getVal("sns_ig"),sns_web:getVal("sns_web")
+    },
+    periods:[...periods],
+    skills:{...skillRatings},
+    savedAt:new Date().toLocaleDateString("ja-JP")
+  };
+  localStorage.setItem("mochimi_data", JSON.stringify(data));
+  const status=document.getElementById("saveStatus");
+  status.innerHTML=`<span class="saved-badge"><i class="ti ti-check"></i> 保存しました（${data.savedAt}）</span>`;
+  setTimeout(()=>status.innerHTML="", 4000);
+}
+
+function checkSaved(){
+  try{
+    const raw=localStorage.getItem("mochimi_data");
+    if(!raw) return;
+    const d=JSON.parse(raw);
+    if(d.profile && d.profile.name){
+      document.getElementById("savedName").textContent=d.profile.name;
+      document.getElementById("savedBox").style.display="block";
+      document.getElementById("startBtn").style.display="none";
+    }
+  }catch(e){}
+}
+
+function loadSaved(){
+  try{
+    const raw=localStorage.getItem("mochimi_data");
+    if(!raw) return;
+    const d=JSON.parse(raw);
+    applyData(d);
+    goStep(1);
+  }catch(e){ startFresh(); }
+}
+
+function applyData(d){
+  if(d.profile){
+    const p=d.profile;
+    setVal("p_name",p.name);setVal("p_age",p.age);setVal("p_gender",p.gender);
+    setVal("p_pref",p.pref);setVal("p_job",p.job);setVal("sns_x",p.sns_x);
+    setVal("sns_fb",p.sns_fb);setVal("sns_li",p.sns_li);setVal("sns_ig",p.sns_ig);setVal("sns_web",p.sns_web);
+  }
+  if(d.periods) periods=[...d.periods];
+  if(d.skills) skillRatings={...d.skills};
+  renderPeriods();renderSkills();
+}
+
+function setVal(id,val){const el=document.getElementById(id);if(el&&val!=null)el.value=val;}
+function startFresh(){
+  document.getElementById("savedBox").style.display="none";
+  document.getElementById("startBtn").style.display="inline-flex";
+  goStep(1);
+}
+
+// ---- Periods ----
 function renderPeriods(){
   const c=document.getElementById("periodsContainer");c.innerHTML="";
   periods.forEach((p,i)=>{
@@ -296,6 +393,7 @@ function drawLifeline(){
   pts.forEach(pt=>{ctx.fillStyle="#1D9E75";ctx.beginPath();ctx.arc(pt.x,pt.y,4,0,Math.PI*2);ctx.fill()});
 }
 
+// ---- Skills ----
 function renderSkills(){
   const container=document.getElementById("skillsContainer");container.innerHTML="";
   const cats=[...new Set(SKILLS.map(s=>s.cat))];
@@ -314,14 +412,16 @@ function renderSkills(){
     });
     container.appendChild(sec);
   });
+  SKILLS.forEach(s=>{if(skillRatings[s.name]>0)applyStars(s.name,skillRatings[s.name])});
 }
 
-function setRating(name,val){
-  skillRatings[name]=val;
+function setRating(name,val){skillRatings[name]=val;applyStars(name,val);}
+function applyStars(name,val){
   const key=name.replace(/\s/g,"");
   document.querySelectorAll(`#stars-${key} .star`).forEach(s=>s.classList.toggle("on",parseInt(s.dataset.val)<=val));
 }
 
+// ---- Navigation ----
 function goStep(n){
   document.getElementById("step-"+currentStep).classList.remove("active");
   currentStep=n;
@@ -339,6 +439,7 @@ function goStep(n){
 
 function getVal(id){return(document.getElementById(id)?.value||"").trim()}
 
+// ---- API呼び出し ----
 function buildPrompt(){
   const prof=[
     getVal("p_name")?"名前："+getVal("p_name"):null,
@@ -354,37 +455,16 @@ function buildPrompt(){
   ].filter(Boolean).join("\n");
   const ll=periods.map((p,i)=>`時期${i+1}「${p.label}」：幸福度${p.score}、出来事：${p.event||"（未記入）"}`).join("\n");
   const sk=SKILLS.map(s=>`${s.name}（${s.cat}）：${"★".repeat(skillRatings[s.name])}${"☆".repeat(5-skillRatings[s.name])} ${skillRatings[s.name]}/5`).join("\n");
-  return `【リスキリングのための持ち味発見セッション】
-
-■プロフィール
-${prof||"（未入力）"}
-
-■ライフライン
-${ll}
-
-■社会人基礎力（5段階評価）
-${sk}
-
-以下の3点を日本語で分析してください。
-1. 希少性・市場性・再現性の3軸で「持ち味」を3〜4個、タイトルと説明・3軸評価を含めて抽出する
-2. ライフラインの幸福度パターンから、この人がやりがいを感じる場面・価値観を読み解く
-3. その持ち味を土台に、次のキャリアに向けてリスキリングすべき分野・スキルを具体的に提案する
-最後に「コーチング用フォローアップ質問」として3つの質問を提示してください。各質問は「Q1：」「Q2：」「Q3：」で始めてください。`;
+  return `【リスキリングのための持ち味発見セッション】\n\n■プロフィール\n${prof||"（未入力）"}\n\n■ライフライン\n${ll}\n\n■社会人基礎力（5段階評価）\n${sk}\n\n以下の3点を日本語で分析してください。\n1. 希少性・市場性・再現性の3軸で「持ち味」を3〜4個、タイトルと説明・3軸評価を含めて抽出する\n2. ライフラインの幸福度パターンから、この人がやりがいを感じる場面・価値観を読み解く\n3. その持ち味を土台に、次のキャリアに向けてリスキリングすべき分野・スキルを具体的に提案する\n最後に「コーチング用フォローアップ質問」として3つの質問を提示してください。各質問は「Q1：」「Q2：」「Q3：」で始めてください。`;
 }
 
 async function callAPI(prompt){
   const res=await fetch("/api/chat",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      messages:[{role:"user",content:prompt}],
-      max_tokens:2000
-    })
+    body:JSON.stringify({messages:[{role:"user",content:prompt}],max_tokens:2000})
   });
-  if(!res.ok){
-    const err=await res.json();
-    throw new Error(err.error||"APIエラー: "+res.status);
-  }
+  if(!res.ok){const err=await res.json();throw new Error(err.error||"APIエラー: "+res.status);}
   const data=await res.json();
   return data.content.map(c=>c.text||"").join("");
 }
@@ -422,20 +502,16 @@ async function runAnalysis(){
           </div>`;
         fqContainer.appendChild(card);
       });
-      document.getElementById("followupSection").style.display="block";
     }
+    document.getElementById("followupSection").style.display="block";
   }catch(e){
     document.getElementById("analysisArea").innerHTML=`
-      <div class="error-box">
-        <strong>エラーが発生しました</strong><br>${e.message}<br><br>
-        <button class="btn-secondary" onclick="runAnalysis()"><i class="ti ti-refresh"></i> 再試行する</button>
-      </div>`;
+      <div class="error-box"><strong>エラーが発生しました</strong><br>${e.message}<br><br>
+      <button class="btn-secondary" onclick="runAnalysis()"><i class="ti ti-refresh"></i> 再試行する</button></div>`;
   }
 }
 
-function toggleFq(num){
-  document.getElementById("fqa-"+num).classList.toggle("open");
-}
+function toggleFq(num){document.getElementById("fqa-"+num).classList.toggle("open")}
 
 async function submitFq(num,question){
   const answer=document.getElementById("fq-text-"+num).value.trim();
@@ -443,11 +519,7 @@ async function submitFq(num,question){
   const respEl=document.getElementById("fq-resp-"+num);
   respEl.innerHTML=`<div class="loading-box" style="padding:1rem"><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div>`;
   try{
-    const prompt=`以下は持ち味発見セッションのフォローアップ質問への回答です。
-質問：${question}
-回答：${answer}
-この回答をもとに、リスキリングの観点から具体的なアドバイスと次のアクションを200〜300字で提案してください。`;
-    const result=await callAPI(prompt);
+    const result=await callAPI(`以下は持ち味発見セッションのフォローアップ質問への回答です。\n質問：${question}\n回答：${answer}\nこの回答をもとに、リスキリングの観点から具体的なアドバイスと次のアクションを200〜300字で提案してください。`);
     fqAnswers[num]={q:question,a:answer,resp:result};
     respEl.innerHTML=`<div class="ai-response">${result}</div>`;
   }catch(e){
@@ -455,18 +527,77 @@ async function submitFq(num,question){
   }
 }
 
-function downloadReport(){
+// ---- PDF出力 ----
+function downloadPdf(){
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
   const name=getVal("p_name")||"ユーザー";
-  const fqSection=Object.keys(fqAnswers).length>0
-    ?`\n━━━━━━━━━━━━━━━━━━━━━━\n■ フォローアップ Q&A\n━━━━━━━━━━━━━━━━━━━━━━\n${Object.values(fqAnswers).map(f=>`Q：${f.q}\nA：${f.a}\nClaudeより：${f.resp}`).join("\n\n")}`:"";
-  const content=`リスキリングのための持ち味発見レポート\n氏名：${name}\n作成日：${new Date().toLocaleDateString("ja-JP")}\n\n━━━━━━━━━━━━━━━━━━━━━━\n■ 持ち味分析結果\n━━━━━━━━━━━━━━━━━━━━━━\n${analysisResult}${fqSection}`;
-  const blob=new Blob([content],{type:"text/plain;charset=utf-8"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;a.download=`持ち味発見レポート_${name}.txt`;
-  a.click();URL.revokeObjectURL(url);
+  const date=new Date().toLocaleDateString("ja-JP");
+  const pageW=210,margin=20,contentW=pageW-margin*2;
+  let y=20;
+
+  function addText(text,x,fontSize,color,maxWidth,lineHeight){
+    doc.setFontSize(fontSize);
+    doc.setTextColor(...(color||[26,26,26]));
+    const lines=doc.splitTextToSize(text,maxWidth||contentW);
+    lines.forEach(line=>{
+      if(y>270){doc.addPage();y=20;}
+      doc.text(line,x,y);
+      y+=lineHeight||fontSize*0.5;
+    });
+  }
+
+  function addSection(title){
+    if(y>250){doc.addPage();y=20;}
+    y+=4;
+    doc.setFillColor(15,110,86);
+    doc.rect(margin,y-4,contentW,8,`F`);
+    doc.setFontSize(11);doc.setTextColor(255,255,255);
+    doc.text(title,margin+3,y+1);
+    y+=10;
+    doc.setTextColor(26,26,26);
+  }
+
+  // タイトル
+  doc.setFillColor(15,110,86);
+  doc.rect(0,0,210,30,"F");
+  doc.setFontSize(16);doc.setTextColor(255,255,255);
+  doc.text("リスキリングのための持ち味発見レポート",margin,14);
+  doc.setFontSize(10);
+  doc.text(`${name} 様　／　${date}`,margin,22);
+  y=40;
+
+  // 分析結果
+  addSection("持ち味分析結果");
+  addText(analysisResult,margin,9,[51,51,51],contentW,5);
+  y+=4;
+
+  // フォローアップ
+  if(Object.keys(fqAnswers).length>0){
+    addSection("フォローアップ Q&A");
+    Object.values(fqAnswers).forEach(f=>{
+      addText("Q："+f.q,margin,9,[15,110,86],contentW,5);
+      y+=2;
+      addText("A："+f.a,margin,9,[51,51,51],contentW,5);
+      y+=2;
+      addText("Claudeより："+f.resp,margin,9,[80,80,80],contentW,5);
+      y+=6;
+    });
+  }
+
+  // フッター
+  const pageCount=doc.internal.getNumberOfPages();
+  for(let i=1;i<=pageCount;i++){
+    doc.setPage(i);
+    doc.setFontSize(8);doc.setTextColor(150,150,150);
+    doc.text(`${i} / ${pageCount}　　リスキリングのための持ち味発見`,margin,290);
+  }
+
+  doc.save(`持ち味発見レポート_${name}.pdf`);
 }
 
+// ---- 初期化 ----
+checkSaved();
 renderPeriods();
 renderSkills();
 setTimeout(drawLifeline,150);
