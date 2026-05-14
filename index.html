@@ -286,15 +286,15 @@ function saveData(){
   };
   localStorage.setItem("mochimi_data",JSON.stringify(data));
   const s=document.getElementById("saveStatus");
-  s.innerHTML=`<span class="saved-badge"><i class="ti ti-check"></i> 保存しました（${data.savedAt}）</span>`;
-  setTimeout(()=>s.innerHTML="",4000);
+  s.innerHTML='<span class="saved-badge"><i class="ti ti-check"></i> 保存しました（'+data.savedAt+'）</span>';
+  setTimeout(function(){s.innerHTML=""},4000);
 }
 
 function checkSaved(){
   try{
-    const raw=localStorage.getItem("mochimi_data");
+    var raw=localStorage.getItem("mochimi_data");
     if(!raw)return;
-    const d=JSON.parse(raw);
+    var d=JSON.parse(raw);
     if(d.profile&&d.profile.name){
       document.getElementById("savedName").textContent=d.profile.name;
       document.getElementById("savedBox").style.display="block";
@@ -305,7 +305,7 @@ function checkSaved(){
 
 function loadSaved(){
   try{
-    const raw=localStorage.getItem("mochimi_data");
+    var raw=localStorage.getItem("mochimi_data");
     if(!raw)return;
     applyData(JSON.parse(raw));
     goStep(1);
@@ -314,17 +314,17 @@ function loadSaved(){
 
 function applyData(d){
   if(d.profile){
-    const p=d.profile;
+    var p=d.profile;
     setVal("p_name",p.name);setVal("p_age",p.age);setVal("p_gender",p.gender);
     setVal("p_pref",p.pref);setVal("p_job",p.job);setVal("sns_x",p.sns_x);
     setVal("sns_fb",p.sns_fb);setVal("sns_li",p.sns_li);setVal("sns_ig",p.sns_ig);setVal("sns_web",p.sns_web);
   }
-  if(d.periods)periods=[...d.periods];
-  if(d.skills)skillRatings={...d.skills};
+  if(d.periods)periods=d.periods.slice();
+  if(d.skills)skillRatings=Object.assign({},d.skills);
   renderPeriods();renderSkills();
 }
 
-function setVal(id,val){const el=document.getElementById(id);if(el&&val!=null)el.value=val;}
+function setVal(id,val){var el=document.getElementById(id);if(el&&val!=null)el.value=val;}
 function startFresh(){
   document.getElementById("savedBox").style.display="none";
   document.getElementById("startBtn").style.display="inline-flex";
@@ -333,74 +333,76 @@ function startFresh(){
 
 // ---- Periods ----
 function renderPeriods(){
-  const c=document.getElementById("periodsContainer");c.innerHTML="";
-  periods.forEach((p,i)=>{
-    const sl=(p.score>0?"+":"")+p.score;
-    const d=document.createElement("div");d.className="period-card";
-    d.innerHTML=`
-      <div class="period-header">
-        <div class="period-num">${i+1}</div>
-        <input class="period-title-input" value="${p.label}" placeholder="例：学生時代" oninput="periods[${i}].label=this.value;drawLifeline()">
-      </div>
-      <div class="slider-row">
-        <span class="slider-label">幸福度</span>
-        <input type="range" min="-100" max="100" step="1" value="${p.score}" oninput="periods[${i}].score=parseInt(this.value);this.nextElementSibling.textContent=(parseInt(this.value)>0?'+':'')+this.value;drawLifeline()">
-        <span class="slider-val">${sl}</span>
-      </div>
-      <textarea placeholder="この時期の主な出来事・やりがいを感じた経験" oninput="periods[${i}].event=this.value">${p.event}</textarea>
-      ${periods.length>2?`<div style="text-align:right;margin-top:4px"><button onclick="removePeriod(${i})" style="font-size:11px;color:#999;background:none;border:none;cursor:pointer">削除</button></div>`:""}
-    `;
+  var c=document.getElementById("periodsContainer");c.innerHTML="";
+  periods.forEach(function(p,i){
+    var sl=(p.score>0?"+":"")+p.score;
+    var d=document.createElement("div");d.className="period-card";
+    d.innerHTML=
+      '<div class="period-header">'+
+        '<div class="period-num">'+(i+1)+'</div>'+
+        '<input class="period-title-input" value="'+p.label+'" placeholder="例：学生時代" oninput="periods['+i+'].label=this.value;drawLifeline()">'+
+      '</div>'+
+      '<div class="slider-row">'+
+        '<span class="slider-label">幸福度</span>'+
+        '<input type="range" min="-100" max="100" step="1" value="'+p.score+'" oninput="periods['+i+'].score=parseInt(this.value);this.nextElementSibling.textContent=(parseInt(this.value)>0?\'+\':\'\')+this.value;drawLifeline()">'+
+        '<span class="slider-val">'+sl+'</span>'+
+      '</div>'+
+      '<textarea placeholder="この時期の主な出来事・やりがいを感じた経験" oninput="periods['+i+'].event=this.value">'+p.event+'</textarea>'+
+      (periods.length>2?'<div style="text-align:right;margin-top:4px"><button onclick="removePeriod('+i+')" style="font-size:11px;color:#999;background:none;border:none;cursor:pointer">削除</button></div>':'');
     c.appendChild(d);
-  });drawLifeline();
+  });
+  drawLifeline();
 }
 
-function addPeriod(){periods.push({label:"時期"+(periods.length+1),score:0,event:""});renderPeriods()}
-function removePeriod(i){periods.splice(i,1);renderPeriods()}
+function addPeriod(){periods.push({label:"時期"+(periods.length+1),score:0,event:""});renderPeriods();}
+function removePeriod(i){periods.splice(i,1);renderPeriods();}
 
 function drawLifeline(){
-  const canvas=document.getElementById("lifeline");if(!canvas)return;
-  const dpr=window.devicePixelRatio||1,W=canvas.offsetWidth||680,H=80;
+  var canvas=document.getElementById("lifeline");if(!canvas)return;
+  var dpr=window.devicePixelRatio||1,W=canvas.offsetWidth||680,H=80;
   canvas.width=W*dpr;canvas.height=H*dpr;
-  const ctx=canvas.getContext("2d");ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
-  const mid=H/2;
+  var ctx=canvas.getContext("2d");ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
+  var mid=H/2;
   ctx.strokeStyle="rgba(0,0,0,0.1)";ctx.lineWidth=0.5;
   ctx.beginPath();ctx.moveTo(16,mid);ctx.lineTo(W-16,mid);ctx.stroke();
   if(periods.length<2)return;
-  const step=(W-32)/(periods.length-1);
-  const pts=periods.map((p,i)=>({x:16+i*step,y:mid-(p.score/100)*(mid-8)}));
+  var step=(W-32)/(periods.length-1);
+  var pts=periods.map(function(p,i){return{x:16+i*step,y:mid-(p.score/100)*(mid-8)};});
   ctx.strokeStyle="#1D9E75";ctx.lineWidth=2;
   ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
-  for(let i=1;i<pts.length;i++){const cpx=pts[i-1].x+(pts[i].x-pts[i-1].x)*0.5;ctx.bezierCurveTo(cpx,pts[i-1].y,cpx,pts[i].y,pts[i].x,pts[i].y)}
+  for(var i=1;i<pts.length;i++){var cpx=pts[i-1].x+(pts[i].x-pts[i-1].x)*0.5;ctx.bezierCurveTo(cpx,pts[i-1].y,cpx,pts[i].y,pts[i].x,pts[i].y);}
   ctx.stroke();
-  pts.forEach(pt=>{ctx.fillStyle="#1D9E75";ctx.beginPath();ctx.arc(pt.x,pt.y,4,0,Math.PI*2);ctx.fill()});
+  pts.forEach(function(pt){ctx.fillStyle="#1D9E75";ctx.beginPath();ctx.arc(pt.x,pt.y,4,0,Math.PI*2);ctx.fill();});
 }
 
 // ---- Skills ----
 function renderSkills(){
-  const container=document.getElementById("skillsContainer");container.innerHTML="";
-  const cats=[...new Set(SKILLS.map(s=>s.cat))];
-  cats.forEach(cat=>{
-    const sec=document.createElement("div");sec.className="skill-section";
-    sec.innerHTML=`<div class="skill-section-hd">${cat}</div>`;
-    SKILLS.filter(s=>s.cat===cat).forEach(s=>{
-      const key=s.name.replace(/\s/g,"");
-      const row=document.createElement("div");row.className="skill-row";
-      row.innerHTML=`
-        <div class="skill-info"><div class="skill-name">${s.name}</div><div class="skill-desc">${s.desc}</div></div>
-        <div class="stars" id="stars-${key}">
-          ${[1,2,3,4,5].map(n=>`<span class="star" data-val="${n}" onclick="setRating('${s.name}',${n})">★</span>`).join("")}
-        </div>`;
+  var container=document.getElementById("skillsContainer");container.innerHTML="";
+  var cats=[];
+  SKILLS.forEach(function(s){if(cats.indexOf(s.cat)<0)cats.push(s.cat);});
+  cats.forEach(function(cat){
+    var sec=document.createElement("div");sec.className="skill-section";
+    sec.innerHTML='<div class="skill-section-hd">'+cat+'</div>';
+    SKILLS.filter(function(s){return s.cat===cat;}).forEach(function(s){
+      var key=s.name.replace(/\s/g,"");
+      var row=document.createElement("div");row.className="skill-row";
+      var stars='';
+      for(var n=1;n<=5;n++){stars+='<span class="star" data-val="'+n+'" onclick="setRating(\''+s.name+'\','+n+')">★</span>';}
+      row.innerHTML=
+        '<div class="skill-info"><div class="skill-name">'+s.name+'</div><div class="skill-desc">'+s.desc+'</div></div>'+
+        '<div class="stars" id="stars-'+key+'">'+stars+'</div>';
       sec.appendChild(row);
     });
     container.appendChild(sec);
   });
-  SKILLS.forEach(s=>{if(skillRatings[s.name]>0)applyStars(s.name,skillRatings[s.name])});
+  SKILLS.forEach(function(s){if(skillRatings[s.name]>0)applyStars(s.name,skillRatings[s.name]);});
 }
 
 function setRating(name,val){skillRatings[name]=val;applyStars(name,val);}
 function applyStars(name,val){
-  const key=name.replace(/\s/g,"");
-  document.querySelectorAll(`#stars-${key} .star`).forEach(s=>s.classList.toggle("on",parseInt(s.dataset.val)<=val));
+  var key=name.replace(/\s/g,"");
+  var stars=document.querySelectorAll("#stars-"+key+" .star");
+  stars.forEach(function(s){s.classList.toggle("on",parseInt(s.dataset.val)<=val);});
 }
 
 // ---- Navigation ----
@@ -408,10 +410,10 @@ function goStep(n){
   document.getElementById("step-"+currentStep).classList.remove("active");
   currentStep=n;
   document.getElementById("step-"+n).classList.add("active");
-  ["p0","p1","p2","p3","p4"].forEach((id,i)=>{
+  ["p0","p1","p2","p3","p4"].forEach(function(id,i){
     document.getElementById(id).className="progress-step"+(i<n?" done":i===n?" current":"");
   });
-  ["pl0","pl1","pl2","pl3","pl4"].forEach((id,i)=>{
+  ["pl0","pl1","pl2","pl3","pl4"].forEach(function(id,i){
     document.getElementById(id).className="progress-label"+(i===n?" current":"");
   });
   window.scrollTo(0,0);
@@ -419,11 +421,11 @@ function goStep(n){
   if(n===4)runAnalysis();
 }
 
-function getVal(id){return(document.getElementById(id)?.value||"").trim()}
+function getVal(id){return(document.getElementById(id)?document.getElementById(id).value:"").trim();}
 
 // ---- API呼び出し ----
 function buildPrompt(){
-  const prof=[
+  var profArr=[
     getVal("p_name")?"名前："+getVal("p_name"):null,
     getVal("p_age")?"年齢："+getVal("p_age")+"歳":null,
     getVal("p_gender")?"性別："+getVal("p_gender"):null,
@@ -434,106 +436,152 @@ function buildPrompt(){
     getVal("sns_li")?"LinkedIn："+getVal("sns_li"):null,
     getVal("sns_ig")?"Instagram："+getVal("sns_ig"):null,
     getVal("sns_web")?"Webサイト："+getVal("sns_web"):null,
-  ].filter(Boolean).join("\n");
-  const ll=periods.map((p,i)=>`時期${i+1}「${p.label}」：幸福度${p.score}、出来事：${p.event||"（未記入）"}`).join("\n");
-  const sk=SKILLS.map(s=>`${s.name}（${s.cat}）：${"★".repeat(skillRatings[s.name])}${"☆".repeat(5-skillRatings[s.name])} ${skillRatings[s.name]}/5`).join("\n");
-  return `【リスキリングのための持ち味発見セッション】\n\n■プロフィール\n${prof||"（未入力）"}\n\n■ライフライン\n${ll}\n\n■社会人基礎力（5段階評価）\n${sk}\n\n以下の3点を日本語で分析してください。\n1. 希少性・市場性・再現性の3軸で「持ち味」を3〜4個、タイトルと説明・3軸評価を含めて抽出する\n2. ライフラインの幸福度パターンから、この人がやりがいを感じる場面・価値観を読み解く\n3. その持ち味を土台に、次のキャリアに向けてリスキリングすべき分野・スキルを具体的に提案する\n最後に「コーチング用フォローアップ質問」として3つの質問を提示してください。各質問は「Q1：」「Q2：」「Q3：」で始めてください。`;
+  ].filter(function(x){return x!==null;});
+  var prof=profArr.join("\n")||"（未入力）";
+  var ll=periods.map(function(p,i){return "時期"+(i+1)+"「"+p.label+"」：幸福度"+p.score+"、出来事："+(p.event||"（未記入）");}).join("\n");
+  var sk=SKILLS.map(function(s){
+    var r=skillRatings[s.name];
+    var stars="";for(var j=0;j<r;j++)stars+="★";for(var j=r;j<5;j++)stars+="☆";
+    return s.name+"（"+s.cat+"）："+stars+" "+r+"/5";
+  }).join("\n");
+
+  return "【リスキリングのための持ち味発見セッション】\n\n"+
+    "■プロフィール\n"+prof+"\n\n"+
+    "■ライフライン\n"+ll+"\n\n"+
+    "■社会人基礎力（5段階評価）\n"+sk+"\n\n"+
+    "以下の3点を日本語で分析してください。\n"+
+    "1. 希少性・市場性・再現性の3軸で「持ち味」を3〜4個、タイトルと説明・3軸評価を含めて抽出する\n"+
+    "2. ライフラインの幸福度パターンから、この人がやりがいを感じる場面・価値観を読み解く\n"+
+    "3. その持ち味を土台に、次のキャリアに向けてリスキリングすべき分野・スキルを具体的に提案する\n\n"+
+    "分析の最後に、必ず以下の形式でコーチング用フォローアップ質問を3つ出力してください。\n"+
+    "形式を変えず、必ずQ1・Q2・Q3の順で出力してください。\n"+
+    "Q1：（質問文をここに記載）\n"+
+    "Q2：（質問文をここに記載）\n"+
+    "Q3：（質問文をここに記載）";
 }
 
 async function callAPI(prompt){
-  const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:[{role:"user",content:prompt}],max_tokens:4000})});
-  if(!res.ok){const err=await res.json();throw new Error(err.error||"APIエラー: "+res.status);}
-  const data=await res.json();
-  return data.content.map(c=>c.text||"").join("");
+  var res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:[{role:"user",content:prompt}],max_tokens:4000})});
+  if(!res.ok){var err=await res.json();throw new Error(err.error||"APIエラー: "+res.status);}
+  var data=await res.json();
+  return data.content.map(function(c){return c.text||"";}).join("");
 }
 
 async function runAnalysis(){
-  document.getElementById("analysisArea").innerHTML=`
-    <div class="loading-box">
-      <div><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div>
-      <p style="font-size:13px;color:#888;margin-top:12px">AIが持ち味を分析しています...</p>
-    </div>`;
+  document.getElementById("analysisArea").innerHTML=
+    '<div class="loading-box">'+
+    '<div><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div>'+
+    '<p style="font-size:13px;color:#888;margin-top:12px">AIが持ち味を分析しています...</p>'+
+    '</div>';
   document.getElementById("followupSection").style.display="none";
   try{
-    const result=await callAPI(buildPrompt());
+    var result=await callAPI(buildPrompt());
     analysisResult=result;
-    const fqs=[];
-    result.split("\n").forEach(line=>{const m=line.match(/^Q([1-3])[:：]\s*(.+)/);if(m)fqs.push({num:m[1],q:m[2].trim()})});
-    document.getElementById("analysisArea").innerHTML=`<div style="font-size:13px;color:#333;line-height:1.8;white-space:pre-wrap;background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:1.25rem">${result}</div>`;
+
+    // Q1〜Q3を抽出（複数パターン対応）
+    var fqs=[];
+    var lines=result.split("\n");
+    lines.forEach(function(line){
+      var m=line.match(/^Q([1-3])[：:]\s*(.+)/);
+      if(m){fqs.push({num:m[1],q:m[2].trim()});}
+    });
+
+    // 分析結果を表示
+    document.getElementById("analysisArea").innerHTML=
+      '<div style="font-size:13px;color:#333;line-height:1.8;white-space:pre-wrap;background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:1.25rem">'+result+'</div>';
+
+    // フォローアップ質問を表示
+    var fqContainer=document.getElementById("fqContainer");
+    fqContainer.innerHTML="";
     if(fqs.length>0){
-      const fqContainer=document.getElementById("fqContainer");fqContainer.innerHTML="";
-      fqs.forEach(({num,q})=>{
-        const card=document.createElement("div");card.className="fq-card";
-        card.innerHTML=`
-          <div class="fq-num">質問 ${num}</div>
-          <div class="fq-question">${q}</div>
-          <button class="fq-open-btn" onclick="toggleFq(${num})"><i class="ti ti-edit"></i> この質問に答える</button>
-          <div class="fq-answer-area" id="fqa-${num}">
-            <textarea id="fq-text-${num}" placeholder="ここに回答を入力してください..." style="min-height:80px;margin-top:8px"></textarea>
-            <button class="fq-submit" onclick="submitFq(${num},'${q.replace(/'/g,"\\'").replace(/\n/g," ")}')"><i class="ti ti-sparkles"></i> AIに深掘りしてもらう</button>
-            <div id="fq-resp-${num}"></div>
-          </div>`;
+      fqs.forEach(function(fq){
+        var card=document.createElement("div");card.className="fq-card";
+        var safeQ=fq.q.replace(/'/g,"&#39;").replace(/"/g,"&quot;");
+        card.innerHTML=
+          '<div class="fq-num">質問 '+fq.num+'</div>'+
+          '<div class="fq-question">'+fq.q+'</div>'+
+          '<button class="fq-open-btn" onclick="toggleFq('+fq.num+')"><i class="ti ti-edit"></i> この質問に答える</button>'+
+          '<div class="fq-answer-area" id="fqa-'+fq.num+'">'+
+            '<textarea id="fq-text-'+fq.num+'" placeholder="ここに回答を入力してください..." style="min-height:80px;margin-top:8px"></textarea>'+
+            '<button class="fq-submit" onclick="submitFq('+fq.num+',\''+safeQ+'\')"><i class="ti ti-sparkles"></i> AIに深掘りしてもらう</button>'+
+            '<div id="fq-resp-'+fq.num+'"></div>'+
+          '</div>';
         fqContainer.appendChild(card);
       });
+    } else {
+      // フォローアップ質問が見つからない場合のフォールバック
+      fqContainer.innerHTML='<p class="note">フォローアップ質問を読み込めませんでした。再試行してください。</p>';
     }
     document.getElementById("followupSection").style.display="block";
+
   }catch(e){
-    document.getElementById("analysisArea").innerHTML=`<div class="error-box"><strong>エラーが発生しました</strong><br>${e.message}<br><br><button class="btn-secondary" onclick="runAnalysis()"><i class="ti ti-refresh"></i> 再試行する</button></div>`;
+    document.getElementById("analysisArea").innerHTML=
+      '<div class="error-box"><strong>エラーが発生しました</strong><br>'+e.message+'<br><br>'+
+      '<button class="btn-secondary" onclick="runAnalysis()"><i class="ti ti-refresh"></i> 再試行する</button></div>';
   }
 }
 
-function toggleFq(num){document.getElementById("fqa-"+num).classList.toggle("open")}
+function toggleFq(num){
+  var area=document.getElementById("fqa-"+num);
+  if(area)area.classList.toggle("open");
+}
 
 async function submitFq(num,question){
-  const answer=document.getElementById("fq-text-"+num).value.trim();
+  var answer=document.getElementById("fq-text-"+num).value.trim();
   if(!answer)return;
-  const respEl=document.getElementById("fq-resp-"+num);
-  respEl.innerHTML=`<div class="loading-box" style="padding:1rem"><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div>`;
+  var respEl=document.getElementById("fq-resp-"+num);
+  respEl.innerHTML='<div class="loading-box" style="padding:1rem"><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div>';
   try{
-    const result=await callAPI(`以下は持ち味発見セッションのフォローアップ質問への回答です。\n質問：${question}\n回答：${answer}\nこの回答をもとに、リスキリングの観点から具体的なアドバイスと次のアクションを200〜300字で提案してください。`);
+    var result=await callAPI("以下は持ち味発見セッションのフォローアップ質問への回答です。\n質問："+question+"\n回答："+answer+"\nこの回答をもとに、リスキリングの観点から具体的なアドバイスと次のアクションを200〜300字で提案してください。");
     fqAnswers[num]={q:question,a:answer,resp:result};
-    respEl.innerHTML=`<div class="ai-response">${result}</div>`;
-  }catch(e){respEl.innerHTML=`<div class="error-box">エラー：${e.message}</div>`;}
+    respEl.innerHTML='<div class="ai-response">'+result+'</div>';
+  }catch(e){
+    respEl.innerHTML='<div class="error-box">エラー：'+e.message+'</div>';
+  }
 }
 
 // ---- マークダウン除去 ----
 function stripMarkdown(text){
   return text
-    .replace(/#{1,6}\s*/g,'')
-    .replace(/\*\*(.*?)\*\*/g,'$1')
-    .replace(/\*(.*?)\*/g,'$1')
-    .replace(/^\s*[-*]\s+/gm,'・')
-    .replace(/^\s*\d+\.\s+/gm,'')
-    .replace(/`{1,3}(.*?)`{1,3}/g,'$1')
-    .replace(/\[([^\]]+)\]\([^)]+\)/g,'$1')
-    .replace(/\n{3,}/g,'\n\n')
+    .replace(/#{1,6}\s*/g,"")
+    .replace(/\*\*(.*?)\*\*/g,"$1")
+    .replace(/\*(.*?)\*/g,"$1")
+    .replace(/^\s*[-*]\s+/gm,"・")
+    .replace(/^\s*\d+\.\s+/gm,"")
+    .replace(/`{1,3}(.*?)`{1,3}/g,"$1")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g,"$1")
+    .replace(/\n{3,}/g,"\n\n")
     .trim();
 }
 
 // ---- レポート保存 ----
 function downloadReport(){
-  const name=getVal("p_name")||"ユーザー";
-  const date=new Date().toLocaleDateString("ja-JP");
-  const sep='='.repeat(50);
-  const cleanResult=stripMarkdown(analysisResult);
-  const fqSection=Object.keys(fqAnswers).length>0
-    ? '\n\n'+sep+'\nフォローアップ Q&A\n'+sep+'\n'+
-      Object.values(fqAnswers).map(f=>
-        'Q：'+f.q+'\n\nA：'+f.a+'\n\nClaudeより：'+stripMarkdown(f.resp)
-      ).join('\n\n'+'-'.repeat(30)+'\n\n')
-    : '';
-  const content=
-    'リスキリングのための持ち味発見レポート\n'+
-    '氏名：'+name+'\n'+
-    '作成日：'+date+'\n\n'+
-    sep+'\n持ち味分析結果\n'+sep+'\n\n'+
+  var name=getVal("p_name")||"ユーザー";
+  var date=new Date().toLocaleDateString("ja-JP");
+  var sep="==================================================";
+  var cleanResult=stripMarkdown(analysisResult);
+  var keys=Object.keys(fqAnswers);
+  var fqSection="";
+  if(keys.length>0){
+    fqSection="\n\n"+sep+"\nフォローアップ Q&A\n"+sep+"\n";
+    var fqParts=keys.map(function(k){
+      var f=fqAnswers[k];
+      return "Q："+f.q+"\n\nA："+f.a+"\n\nClaudeより："+stripMarkdown(f.resp);
+    });
+    fqSection+=fqParts.join("\n\n------------------------------\n\n");
+  }
+  var content=
+    "リスキリングのための持ち味発見レポート\n"+
+    "氏名："+name+"\n"+
+    "作成日："+date+"\n\n"+
+    sep+"\n持ち味分析結果\n"+sep+"\n\n"+
     cleanResult+fqSection;
-  const bom='\uFEFF';
-  const blob=new Blob([bom+content],{type:'text/plain;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
+  var bom="\uFEFF";
+  var blob=new Blob([bom+content],{type:"text/plain;charset=utf-8"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");
   a.href=url;
-  a.download='持ち味発見レポート_'+name+'.txt';
+  a.download="持ち味発見レポート_"+name+".txt";
   a.click();
   URL.revokeObjectURL(url);
 }
