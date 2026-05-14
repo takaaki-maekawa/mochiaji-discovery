@@ -200,10 +200,12 @@ canvas{border-radius:8px;border:1px solid #e0e0e0;background:#fafafa;width:100%;
   <p class="lead">人生の各時期を振り返り、幸福度（−100〜100）と出来事を入力してください。特に「やりがいを感じた経験」「うまくいった仕事」に注目してみましょう。</p>
   <div id="periodsContainer"></div>
   <button class="btn-secondary" onclick="addPeriod()" style="margin-bottom:1rem;font-size:13px"><i class="ti ti-plus"></i> 時期を追加</button>
-  <canvas id="lifeline" height="80"></canvas>
+  <canvas id="lifeline" height="200"></canvas>
   <div class="btn-row">
     <button class="btn-secondary" onclick="goStep(1)"><i class="ti ti-arrow-left"></i> 戻る</button>
     <button class="btn-primary" onclick="goStep(3)">次へ <i class="ti ti-arrow-right"></i></button>
+    <button class="btn-green" onclick="downloadLifeline()"><i class="ti ti-download"></i> テキストで保存（.txt）</button>
+    <button class="btn-amber" onclick="downloadLifelinePng()"><i class="ti ti-photo"></i> 画像で保存（.png）</button>
   </div>
 </div>
 
@@ -213,9 +215,12 @@ canvas{border-radius:8px;border:1px solid #e0e0e0;background:#fafafa;width:100%;
   <h2>社会人基礎力 スキル評価</h2>
   <p class="lead">各スキルについて、自分の強さを★で5段階評価してください。</p>
   <div id="skillsContainer"></div>
+  <canvas id="skillChart" height="320" style="border-radius:8px;border:1px solid #e0e0e0;background:#fafafa;width:100%;display:block;margin:1rem 0;"></canvas>
   <div class="btn-row">
     <button class="btn-secondary" onclick="goStep(2)"><i class="ti ti-arrow-left"></i> 戻る</button>
     <button class="btn-primary" onclick="goStep(4)">AI分析を依頼する <i class="ti ti-sparkles"></i></button>
+    <button class="btn-green" onclick="downloadSkillText()"><i class="ti ti-download"></i> テキストで保存（.txt）</button>
+    <button class="btn-amber" onclick="downloadSkillPng()"><i class="ti ti-photo"></i> 画像で保存（.png）</button>
   </div>
 </div>
 
@@ -243,9 +248,9 @@ canvas{border-radius:8px;border:1px solid #e0e0e0;background:#fafafa;width:100%;
     </div>
     <div style="margin-top:1rem"></div>
     <div class="action-section">
-      <div class="action-section-title"><i class="ti ti-file-text"></i> レポートを出力する</div>
+      <div class="action-section-title"><i class="ti ti-file-text"></i> レポートを保存する</div>
       <div class="action-section-desc">分析結果・フォローアップQ&Aをテキストファイルとしてダウンロードできます。</div>
-      <button class="btn-amber" onclick="downloadReport()"><i class="ti ti-download"></i> レポートを出力する（.txt）</button>
+      <button class="btn-amber" onclick="downloadReport()"><i class="ti ti-download"></i> レポートを保存する（.txt）</button>
     </div>
   </div>
   <div class="btn-row" style="margin-top:1.5rem">
@@ -256,7 +261,7 @@ canvas{border-radius:8px;border:1px solid #e0e0e0;background:#fafafa;width:100%;
 </div>
 
 <script>
-const SKILLS=[
+var SKILLS=[
   {cat:"前に踏み出す力",name:"主体性",desc:"進んで物事に取り組む"},
   {cat:"前に踏み出す力",name:"働きかけ力",desc:"他人を巻き込む"},
   {cat:"前に踏み出す力",name:"実行力",desc:"目的を設定し行動する"},
@@ -271,21 +276,21 @@ const SKILLS=[
   {cat:"チームで働く力",name:"ストレス対応",desc:"発生源に対応する"},
 ];
 
-let skillRatings={};
-SKILLS.forEach(s=>skillRatings[s.name]=0);
-let periods=[{label:"時期1",score:0,event:""},{label:"時期2",score:0,event:""},{label:"時期3",score:0,event:""}];
-let currentStep=0;
-let analysisResult='';
-let fqAnswers={};
+var skillRatings={};
+SKILLS.forEach(function(s){skillRatings[s.name]=0;});
+var periods=[{label:"時期1",score:0,event:""},{label:"時期2",score:0,event:""},{label:"時期3",score:0,event:""}];
+var currentStep=0;
+var analysisResult='';
+var fqAnswers={};
 
 // ---- データ保存・読み込み ----
 function saveData(){
-  const data={
+  var data={
     profile:{name:getVal("p_name"),age:getVal("p_age"),gender:getVal("p_gender"),pref:getVal("p_pref"),job:getVal("p_job"),sns_x:getVal("sns_x"),sns_fb:getVal("sns_fb"),sns_li:getVal("sns_li"),sns_ig:getVal("sns_ig"),sns_web:getVal("sns_web")},
     periods:[...periods],skills:{...skillRatings},savedAt:new Date().toLocaleDateString("ja-JP")
   };
   localStorage.setItem("mochimi_data",JSON.stringify(data));
-  const s=document.getElementById("saveStatus");
+  var s=document.getElementById("saveStatus");
   s.innerHTML='<span class="saved-badge"><i class="ti ti-check"></i> 保存しました（'+data.savedAt+'）</span>';
   setTimeout(function(){s.innerHTML=""},4000);
 }
@@ -359,20 +364,49 @@ function removePeriod(i){periods.splice(i,1);renderPeriods();}
 
 function drawLifeline(){
   var canvas=document.getElementById("lifeline");if(!canvas)return;
-  var dpr=window.devicePixelRatio||1,W=canvas.offsetWidth||680,H=80;
+  var dpr=window.devicePixelRatio||1,W=canvas.offsetWidth||680,H=200;
   canvas.width=W*dpr;canvas.height=H*dpr;
   var ctx=canvas.getContext("2d");ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
-  var mid=H/2;
-  ctx.strokeStyle="rgba(0,0,0,0.1)";ctx.lineWidth=0.5;
-  ctx.beginPath();ctx.moveTo(16,mid);ctx.lineTo(W-16,mid);ctx.stroke();
+  var padL=48,padR=20,padT=20,padB=40;
+  var gW=W-padL-padR,gH=H-padT-padB;
+  var mid=padT+gH/2;
+  // 背景
+  ctx.fillStyle="#f8faf9";ctx.fillRect(0,0,W,H);
+  // グリッド線
+  ctx.strokeStyle="rgba(0,0,0,0.08)";ctx.lineWidth=0.5;
+  [100,50,0,-50,-100].forEach(function(v){
+    var y=padT+gH/2-(v/100)*(gH/2);
+    ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(W-padR,y);ctx.stroke();
+    ctx.fillStyle="#999";ctx.font="10px sans-serif";ctx.textAlign="right";
+    ctx.fillText(v,padL-4,y+4);
+  });
+  // 中央線（0）
+  ctx.strokeStyle="rgba(0,0,0,0.2)";ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(padL,mid);ctx.lineTo(W-padR,mid);ctx.stroke();
+  // タイトル
+  ctx.fillStyle="#0F6E56";ctx.font="bold 13px sans-serif";ctx.textAlign="left";
+  ctx.fillText("ライフラインチャート",padL,12);
   if(periods.length<2)return;
-  var step=(W-32)/(periods.length-1);
-  var pts=periods.map(function(p,i){return{x:16+i*step,y:mid-(p.score/100)*(mid-8)};});
-  ctx.strokeStyle="#1D9E75";ctx.lineWidth=2;
+  var step=gW/(periods.length-1);
+  var pts=periods.map(function(p,i){return{x:padL+i*step,y:padT+gH/2-(p.score/100)*(gH/2)};});
+  // 曲線
+  ctx.strokeStyle="#1D9E75";ctx.lineWidth=2.5;
   ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
   for(var i=1;i<pts.length;i++){var cpx=pts[i-1].x+(pts[i].x-pts[i-1].x)*0.5;ctx.bezierCurveTo(cpx,pts[i-1].y,cpx,pts[i].y,pts[i].x,pts[i].y);}
   ctx.stroke();
-  pts.forEach(function(pt){ctx.fillStyle="#1D9E75";ctx.beginPath();ctx.arc(pt.x,pt.y,4,0,Math.PI*2);ctx.fill();});
+  // 点とラベル
+  pts.forEach(function(pt,i){
+    ctx.fillStyle="#1D9E75";ctx.beginPath();ctx.arc(pt.x,pt.y,5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(pt.x,pt.y,2.5,0,Math.PI*2);ctx.fill();
+    // 時期ラベル
+    ctx.fillStyle="#555";ctx.font="9px sans-serif";ctx.textAlign="center";
+    var label=periods[i].label.length>8?periods[i].label.substring(0,8)+"..":periods[i].label;
+    ctx.fillText(label,pt.x,H-padB+14);
+    // 幸福度ラベル
+    ctx.fillStyle="#0F6E56";ctx.font="bold 10px sans-serif";
+    var scoreLabel=(periods[i].score>0?"+":"")+periods[i].score;
+    ctx.fillText(scoreLabel,pt.x,pt.y-10);
+  });
 }
 
 // ---- Skills ----
@@ -396,9 +430,10 @@ function renderSkills(){
     container.appendChild(sec);
   });
   SKILLS.forEach(function(s){if(skillRatings[s.name]>0)applyStars(s.name,skillRatings[s.name]);});
+  setTimeout(drawSkillChart,100);
 }
 
-function setRating(name,val){skillRatings[name]=val;applyStars(name,val);}
+function setRating(name,val){skillRatings[name]=val;applyStars(name,val);drawSkillChart();}
 function applyStars(name,val){
   var key=name.replace(/\s/g,"");
   var stars=document.querySelectorAll("#stars-"+key+" .star");
@@ -418,6 +453,7 @@ function goStep(n){
   });
   window.scrollTo(0,0);
   if(n===2)setTimeout(drawLifeline,100);
+  if(n===3)setTimeout(drawSkillChart,100);
   if(n===4)runAnalysis();
 }
 
@@ -554,7 +590,7 @@ function stripMarkdown(text){
     .trim();
 }
 
-// ---- レポート出力 ----
+// ---- レポート保存 ----
 function downloadReport(){
   var name=getVal("p_name")||"ユーザー";
   var date=new Date().toLocaleDateString("ja-JP");
@@ -576,12 +612,129 @@ function downloadReport(){
     "作成日："+date+"\n\n"+
     sep+"\n持ち味分析結果\n"+sep+"\n\n"+
     cleanResult+fqSection;
-  var bom="\uFEFF";
+  var bom="﻿";
   var blob=new Blob([bom+content],{type:"text/plain;charset=utf-8"});
   var url=URL.createObjectURL(blob);
   var a=document.createElement("a");
   a.href=url;
   a.download="持ち味発見レポート_"+name+".txt";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ---- スキルチャート描画 ----
+function drawSkillChart(){
+  var canvas=document.getElementById("skillChart");if(!canvas)return;
+  var dpr=window.devicePixelRatio||1,W=canvas.offsetWidth||680,H=320;
+  canvas.width=W*dpr;canvas.height=H*dpr;
+  var ctx=canvas.getContext("2d");ctx.scale(dpr,dpr);
+  ctx.fillStyle="#f8faf9";ctx.fillRect(0,0,W,H);
+  var padL=120,padR=60,padT=30,padB=20;
+  var gW=W-padL-padR,gH=H-padT-padB;
+  var barH=Math.min(22,gH/SKILLS.length-4);
+  // タイトル
+  ctx.fillStyle="#0F6E56";ctx.font="bold 13px sans-serif";ctx.textAlign="left";
+  ctx.fillText("社会人基礎力 スキル評価",padL,16);
+  // 各スキルのバー
+  SKILLS.forEach(function(s,i){
+    var y=padT+i*(gH/SKILLS.length)+4;
+    var rating=skillRatings[s.name]||0;
+    var barW=(rating/5)*gW;
+    // カテゴリ色
+    var color=s.cat==="前に踏み出す力"?"#1D9E75":s.cat==="考え抜く力"?"#534AB7":"#BA7517";
+    // 背景バー
+    ctx.fillStyle="#e8e8e8";ctx.fillRect(padL,y,gW,barH);
+    // 実際のバー
+    if(barW>0){ctx.fillStyle=color;ctx.fillRect(padL,y,barW,barH);}
+    // スキル名
+    ctx.fillStyle="#333";ctx.font="11px sans-serif";ctx.textAlign="right";
+    ctx.fillText(s.name,padL-6,y+barH/2+4);
+    // 評価数値
+    ctx.fillStyle="#fff";ctx.font="bold 10px sans-serif";ctx.textAlign="left";
+    if(barW>20)ctx.fillText(rating+"/5",padL+barW-22,y+barH/2+4);
+    else{ctx.fillStyle="#555";ctx.fillText(rating+"/5",padL+barW+4,y+barH/2+4);}
+    // 星表示
+    ctx.fillStyle=color;ctx.font="10px sans-serif";ctx.textAlign="left";
+    var stars="";for(var j=0;j<rating;j++)stars+="★";for(var j=rating;j<5;j++)stars+="☆";
+    ctx.fillText(stars,W-padR+4,y+barH/2+4);
+  });
+  // 凡例
+  var cats=[{name:"前に踏み出す力",color:"#1D9E75"},{name:"考え抜く力",color:"#534AB7"},{name:"チームで働く力",color:"#BA7517"}];
+  var lx=padL,ly=H-8;
+  cats.forEach(function(c){
+    ctx.fillStyle=c.color;ctx.fillRect(lx,ly-8,10,8);
+    ctx.fillStyle="#555";ctx.font="9px sans-serif";ctx.textAlign="left";
+    ctx.fillText(c.name,lx+13,ly);
+    lx+=ctx.measureText(c.name).width+30;
+  });
+}
+
+// ---- スキルテキスト出力 ----
+function downloadSkillText(){
+  var name=getVal("p_name")||"ユーザー";
+  var date=new Date().toLocaleDateString("ja-JP");
+  var sep="==================================================";
+  var text="社会人基礎力 スキル評価" + "\n" + "氏名：" + name + "\n" + "出力日：" + date + "\n\n" + sep + "\n";
+  var currentCat="";
+  SKILLS.forEach(function(s){
+    if(s.cat!==currentCat){currentCat=s.cat;text+="\n【"+s.cat+"】\n";}
+    var r=skillRatings[s.name]||0;
+    var stars="";for(var j=0;j<r;j++)stars+="★";for(var j=r;j<5;j++)stars+="☆";
+    text+="  "+s.name+"："+stars+" "+r+"/5\n";
+  });
+  var blob=new Blob(["﻿"+text],{type:"text/plain;charset=utf-8"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");
+  a.href=url;a.download="社会人基礎力_"+name+".txt";a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ---- スキルPNG出力 ----
+function downloadSkillPng(){
+  var name=getVal("p_name")||"ユーザー";
+  var canvas=document.getElementById("skillChart");if(!canvas)return;
+  var url=canvas.toDataURL("image/png");
+  var a=document.createElement("a");
+  a.href=url;a.download="社会人基礎力_"+name+".png";a.click();
+}
+
+// ---- ライフラインPNG出力 ----
+function downloadLifelinePng(){
+  var name=getVal("p_name")||"ユーザー";
+  var canvas=document.getElementById("lifeline");
+  if(!canvas)return;
+  // 一時的に大きなcanvasを作って高解像度で描画
+  var orig=canvas;
+  var tmpCanvas=document.createElement("canvas");
+  var scale=2;
+  tmpCanvas.width=orig.width*scale;
+  tmpCanvas.height=orig.height*scale;
+  var tmpCtx=tmpCanvas.getContext("2d");
+  tmpCtx.scale(scale,scale);
+  tmpCtx.drawImage(orig,0,0,orig.width/window.devicePixelRatio,orig.height/window.devicePixelRatio);
+  var url=canvas.toDataURL("image/png");
+  var a=document.createElement("a");
+  a.href=url;
+  a.download="ライフライン_"+name+".png";
+  a.click();
+}
+
+// ---- ライフライン出力 ----
+function downloadLifeline(){
+  var name=getVal("p_name")||"ユーザー";
+  var date=new Date().toLocaleDateString("ja-JP");
+  var sep="==================================================";
+  var text="ライフラインチャート" + "\n" + "氏名：" + name + "\n" + "出力日：" + date + "\n\n" + sep + "\n\n";
+  periods.forEach(function(p,i){
+    text+="時期"+(i+1)+"「"+p.label+"」：幸福度"+(p.score>0?"+":"")+p.score+"\n";
+    if(p.event){text+="出来事："+p.event+"\n";}
+    text+="\n";
+  });
+  var blob=new Blob(["﻿"+text],{type:"text/plain;charset=utf-8"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");
+  a.href=url;
+  a.download="ライフライン_"+name+".txt";
   a.click();
   URL.revokeObjectURL(url);
 }
